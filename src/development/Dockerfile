@@ -7,7 +7,7 @@
 # Use the follow command to create the image
 # docker build  -t development -f development/Dockerfile .
 # Use the follow command to start the container 
-# docker run -d --name flask-dev -p 5000:5000  development
+# docker run -d -v flaskr:/flaskr --name flask-dev -p 5000:5000  development
 
 FROM python:3
 

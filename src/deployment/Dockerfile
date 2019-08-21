@@ -19,8 +19,7 @@ RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
 ENV FLASK_APP flaskr
-ENV FLASK_ENV development
 
-EXPOSE 5000:5000
+#EXPOSE 5000:443
 
-CMD flask run --host=0.0.0.0
+CMD flask run 
