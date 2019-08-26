@@ -1,3 +1,4 @@
 # This file will make build ignore the temporal files
 
 __pycache__
+*.pyc

@@ -20,6 +20,4 @@ RUN pip install --upgrade pip && \
 
 ENV FLASK_APP flaskr
 
-#EXPOSE 5000:443
-
 CMD flask run 
