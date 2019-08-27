@@ -13,6 +13,7 @@ FROM python:3
 WORKDIR /usr/src/app
 
 COPY ./requirements.txt ./
+COPY ./entrypoint.py ./
 COPY ./flaskr ./flaskr
 
 RUN pip install --upgrade pip && \
@@ -20,4 +21,6 @@ RUN pip install --upgrade pip && \
 
 ENV FLASK_APP flaskr
 
-CMD flask run 
+EXPOSE 5000:5000
+
+CMD python entrypoint.py --host "0.0.0.0" --port "5000"
