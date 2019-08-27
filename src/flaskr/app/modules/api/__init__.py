@@ -17,4 +17,5 @@ api.add_namespace(product_any_ns)
 api.add_namespace(product_admin_ns)
 api.add_namespace(cart_any_ns)
 
+
 # We will probably add in Blueprinting for versioning of API, but Blueprinting for now should be unnecessary
