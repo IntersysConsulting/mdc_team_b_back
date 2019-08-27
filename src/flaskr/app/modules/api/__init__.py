@@ -1,6 +1,6 @@
 from flask_restplus import Api, Namespace, Resource
 # When you finish your class, add it under this one.
-from .product import any_ns, admin_ns 
+import .product as product
 
 # Keep this as is for now
 api = Api(
@@ -10,7 +10,7 @@ api = Api(
 )
 
 # After you import your namespaces, import them into the API
-api.add_namespace(any_ns)
-api.add_namespace(admin_ns)
+api.add_namespace(product.any_ns)
+api.add_namespace(product.admin_ns)
 
 # We will probably add in Blueprinting for versioning of API, but Blueprinting for now should be unnecessary
