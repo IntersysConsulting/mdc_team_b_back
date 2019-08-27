@@ -6,13 +6,22 @@ from urllib.parse import quote_plus
 
 class Mongo:
     def __init__(self):
-        protocol = 'mongodb://'
-        user = 'intersys'
-        password = 's3cureP@ssw0rd'
-        server = '127.0.0.1'
-        port = '27001'        
-        mongo_url = protocol + user + ':' + quote_plus(password) + '@' + server + ':' + port
-        self.db = MongoClient(mongo_url).webproject
+        protocol = 'mongodb+srv://'
+        user, password = 'ibp-user', 'LuvOUo9Zcadyl8xc'
+        server = 'teamb-cluster-ogtju.mongodb.net'
+        options = 'test?retryWrites=true&w=majority'
+        database = 'ecommerce'
+
+        mongo_url = "{0}{1}:{2}@{3}/{4}".format(protocol, user, password, server, options)
+        # protocol = 'mongodb://'
+        # user = 'intersys'
+        # password = 's3cureP@ssw0rd'
+        # server = '127.0.0.1'
+        # port = '27001'        
+        # database = webproject
+        # mongo_url = protocol + user + ':' + quote_plus(password) + '@' + server + ':' + port
+
+        self.db = MongoClient(mongo_url)[database]
 
     def find_all(self, table, selector, sort, _ascending, _next_page, _page_size):  
         if(sort!=None):
