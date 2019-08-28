@@ -31,37 +31,56 @@ admin_ns = Namespace("admin/products", description="Admin APIs that work with pr
 
 # Customer Section
 
+get_product_parser = any_ns.parser()
+get_product_parser.add_argument('sort', type=int, help='ID of the Sorting method to be used',required=False)
+get_product_parser.add_argument('filter', help='A description of the filtering parameters to be used', required=False)
+get_product_parser.add_argument('page', type=int, help='Page the request is asking for', required=False)
+
 # This responds to www.servername.com:5000/namespace/ 
 # In this case /products/ 
 @any_ns.route("/")
-class Product(Resource):     
-    # This implemets the GET over the route
-    def get(self): 
-        # This adds a description of the method to the documentation. Make it as descriptive as possible.
-        """
-        Returns a list of products
-        """
-        #To build a response we jsonify it
-        response = jsonify({"statusCode":200})
-        return response 
-# This responds to www.servername.com:5000/namespace/1/filter_sample/1
-# This route accepts parameters which can be passed on to the GET
-# In this case /Products/1/filter_sample/1
-@any_ns.route("/<int:sort>/<string:filter>/<int:page>")
-class UserProducts(Resource): 
-    # This is how you document a parameter for get views / views that get parameters from route
-    # All the parameters from routes are required.
-    @any_ns.param('filter', 'A comma separated string of all the filters that apply')
-    @any_ns.param('sort','The ID of the sorting method to be used.')
-    @any_ns.param('page', 'The page requested (Default: 0)')
-    # The parameters get passed on to the function like this. Name must match the <type:name>
-    def get(self, sort, filter, page): 
-        """
-        Returns a sorted and filtered list of products
-        """
-        # We reply with data in this case.
+class Product(Resource): 
+    @any_ns.expect(get_product_parser)
+    def get(self):
+        '''
+        Returns a list of products. May be sorted, and filtered optionally.
+        '''
+        args = get_product_parser.parse_args()
+        filter = " " if not args['filter'] else args['filter']
+        sort = 0 if not args['sort'] else args['sort']
+        page = 0 if not args['page'] else args['page']
         response = jsonify({"statusCode":200, "data":{"sort":sort, "filter":filter, "page":page}})
         return response 
+    # Old way to do it, new one may be longer but works flawlessly with optional parameters while the old one fails to respond in swagger
+    # @any_ns.route("/")
+    # class Product(Resource):     
+    #     # This implemets the GET over the route
+    #     def get(self): 
+    #         # This adds a description of the method to the documentation. Make it as descriptive as possible.
+    #         """
+    #         Returns a list of products
+    #         """
+    #         #To build a response we jsonify it
+    #         response = jsonify({"statusCode":200})
+    #         return response 
+    # # This responds to www.servername.com:5000/namespace/1/filter_sample/1
+    # # This route accepts parameters which can be passed on to the GET
+    # # In this case /Products/1/filter_sample/1
+    # @any_ns.route("/<int:sort>/<string:filter>/<int:page>/")
+    # class UserProducts(Resource): 
+    #     # This is how you document a parameter for get views / views that get parameters from route
+    #     # All the parameters from routes are required.
+    #     @any_ns.param('filter', 'A comma separated string of all the filters that apply')
+    #     @any_ns.param('sort','The ID of the sorting method to be used.')
+    #     @any_ns.param('page', 'The page requested (Default: 0)')
+    #     # The parameters get passed on to the function like this. Name must match the <type:name>
+    #     def get(self, sort, filter, page): 
+    #         """
+    #         Returns a sorted and filtered list of products
+    #         """
+    #         # We reply with data in this case.
+    #         response = jsonify({"statusCode":200, "data":{"sort":sort, "filter":filter, "page":page}})
+    #         return response 
 
 
 # Admin Section
