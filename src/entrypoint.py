@@ -110,8 +110,8 @@ def main():
     options = options[:-2]
     replace_run(options)
 
-  #  with subprocess.Popen(['python', 'flaskr/app/run.py'], stdout=subprocess.PIPE) as process:
- #       process.communicate()
+    with subprocess.Popen(['python', 'flaskr/app/run.py'], stdout=subprocess.PIPE) as process:
+        process.communicate()
 
 if __name__ == "__main__":
     main()
