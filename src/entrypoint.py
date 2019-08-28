@@ -79,6 +79,11 @@ def main():
     )
 
     parser.add_argument(
+        '--ssl-context',
+        help='Context configuration for Flask server. Use "" for context'
+    )
+
+    parser.add_argument(
         '--development',
         type=str2bool,
         default=False,
@@ -98,15 +103,15 @@ def main():
     options = ''
     for arg in vars(argp):
         if getattr(argp, arg) is not None:
-            if arg == 'host' or arg == 'port':
+            if arg == 'host' or arg == 'port' or arg == 'ssl_context':
                 options += '{}="{}", '.format(arg, getattr(argp, arg))
             else:
                 options += '{}={}, '.format(arg, getattr(argp, arg))
     options = options[:-2]
     replace_run(options)
 
-    with subprocess.Popen(['python', 'flaskr/app/run.py'], stdout=subprocess.PIPE) as process:
-        process.communicate()
+  #  with subprocess.Popen(['python', 'flaskr/app/run.py'], stdout=subprocess.PIPE) as process:
+ #       process.communicate()
 
 if __name__ == "__main__":
     main()

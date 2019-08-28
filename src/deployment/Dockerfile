@@ -23,4 +23,4 @@ ENV FLASK_APP flaskr
 
 EXPOSE 5000:5000
 
-CMD python entrypoint.py --host "0.0.0.0" --port "5000"
+CMD python entrypoint.py --host "0.0.0.0" 
