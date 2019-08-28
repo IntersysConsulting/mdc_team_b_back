@@ -91,22 +91,23 @@ class Product(Resource):
 
 #Add product 
 product_add_parser = admin_ns.parser()
-product_add_parser.add_argument('name', help='Name of the product to be added', required=True) 
-product_add_parser.add_argument('price', help='Price in cents of the product to be added', required=True)
+# location = 'form' Means it is expected in the data field of the HTTP request
+product_add_parser.add_argument('name', help='Name of the product to be added', required=True, location='form') 
+product_add_parser.add_argument('price', help='Price in cents of the product to be added', required=True, location='form')
 product_add_parser.add_argument('picture', help='Picture of the product to be added', type=FileStorage, location='files', required=True)
-product_add_parser.add_argument('description', help='Description of the product to be added', required=False) # Some fields can be optional
+product_add_parser.add_argument('description', help='Description of the product to be added', required=False, location='form') # Some fields can be optional
 
 #Update product
 product_update_parser = admin_ns.parser()
-product_update_parser.add_argument('id', type=int, help='ID of the product to be updated', required=True)
-product_update_parser.add_argument('name', help='Name of the product to be updated', required=True)
-product_update_parser.add_argument('price', help='Price in cents of the product to be updated', required=True)
+product_update_parser.add_argument('id', type=int, help='ID of the product to be updated', required=True, location='form')
+product_update_parser.add_argument('name', help='Name of the product to be updated', required=True, location='form')
+product_update_parser.add_argument('price', help='Price in cents of the product to be updated', required=True, location='form')
 product_update_parser.add_argument('picture', help='Picture of the product to be updated', type=FileStorage, location='files', required=True)
-product_update_parser.add_argument('description', help='Description of the product to be updated', required=False)
+product_update_parser.add_argument('description', help='Description of the product to be updated', required=False, location='form')
 
 #Delete product
 product_delete_parser = admin_ns.parser()
-product_delete_parser.add_argument('id', type=int, help='ID of the product to be deleted', required=True)
+product_delete_parser.add_argument('id', type=int, help='ID of the product to be deleted', required=True, location='form')
 
 # This responds to website:5000/admin/products/, it uses a different namespace (admin_ns, not any_ns) 
 @admin_ns.route('/')
@@ -133,6 +134,8 @@ class AdminProducts(Resource):
         #              True value            IF    condition    ELSE       False value
         description = 'No description' if not args['description'] else args['description'] #Do this for optional fields
 
+        picture.save(picture.filename)
+
         response = jsonify({"statusCode":200, "data":{"name":name, "price":price, "picture":picture.filename, "description":description}})
         return response 
     
@@ -148,7 +151,9 @@ class AdminProducts(Resource):
         price = args['price']
         picture = args['picture']
         description = 'No description' if not args['description'] else args['description'] #Do this for optional fields
-        
+
+        picture.save(picture.filename)
+
         response = jsonify({"statusCode":200, "data":{"id":pId, "name":name, "price":price, "picture":picture.filename, "description":description}})
         return response 
 
