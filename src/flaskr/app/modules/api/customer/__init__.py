@@ -1,0 +1,146 @@
+from flask import jsonify
+from flask_restplus import Resource, fields, Namespace
+from ...resources.customer import Customer
+# FileStorage allows us to import files from http requests.
+from werkzeug.datastructures import FileStorage
+from datetime import datetime
+from .get import Get, Parser as get_acc_details
+from .post import Post, Parser as create_new_acc_parser
+from .guest.post import Post as GuestPost
+from .guest.put import Put as GuestPut, Parser as update_guest_info_parser
+from .billing.post import Post as BillingPost, Parser as add_acc_billing
+from .billing.put import Put as BillingPut , Parser as upd_acc_billing
+from .billing.delete import Delete as BillingDelete , Parser as delete_billing_parser
+from .shipping.post import Post as ShippingPost, Parser as add_acc_shipping
+from .shipping.put import Put as ShippingPut, Parser as upd_acc_shipping
+from .shipping.delete import Delete as ShippingDelete, Parser as delete_shipping_parser
+
+guest_ns = Namespace(
+    "customers/guest",
+    description="Endpoints that allow users to work with guest accounts")
+customer_ns = Namespace(
+    "customers",
+    description="Endpoints that interact with guest and customer accounts")
+
+#########################################################
+#   Guest Account section
+#########################################################
+
+
+@guest_ns.route("/")
+class GuestOptions(Resource):
+    def post(self):
+        '''
+        Creates guest account so guest can use a cart
+        '''
+        return GuestPost()
+
+    @guest_ns.response(200, 'Successfully updated guest information')
+    @guest_ns.expect(update_guest_info_parser)
+    def put(self):
+        '''
+        When a guest wants to finish a purchase we get their information to be stored in their guest account. 
+        '''
+        args = update_guest_info_parser.parse_args()
+
+        return GuestPut(args)
+
+
+#########################################################
+#   Customer Account section
+#########################################################
+
+
+@customer_ns.route("/")  #pagename:port/customer/
+class CustomerOptions(Resource):
+    @customer_ns.response(200, 'Account succesfully created')
+    @customer_ns.expect(create_new_acc_parser)
+    def post(self):
+        '''
+        Creates a new account. 
+        Passes the old guest auth token as a parameter to modify the document in the database.
+        This allows us to retain shipping and billing addresses that were previously assigned, and to retain the user's cart after they sign up.
+        In reality it should only respond with the Authorization token
+        '''
+        args = create_new_acc_parser.parse_args()
+        return Post(args)
+
+    @customer_ns.expect(get_acc_details)
+    def get(self):
+        """
+        Returns the customer's visible data.
+        Visible Data: First name, Last name, E-Mail, Phone Number, and various addresses. 
+        Excludes information like password, TOS timestamp, account creation timestamp and cart id since they're unnecessary for our customer. 
+        """
+        args = get_acc_details.parse_args()
+
+        return Get(args)
+
+#########################################################
+#   Billing section
+#########################################################
+
+@customer_ns.route("/billing")  #pagename:port/customer/billing
+class CustomerBillingOptions(Resource):
+    @customer_ns.response(200, 'Billing address succesfully added')
+    @customer_ns.expect(add_acc_billing)
+    def post(self):
+        '''
+        Creates new billing address
+        '''
+        args = add_acc_billing.parse_args()
+
+        return BillingPost(args)
+
+    @customer_ns.response(200, 'Billing address succesfully updated')
+    @customer_ns.expect(upd_acc_billing)
+    def put(self):
+        '''
+        Updates a billing address
+        '''
+        args = upd_acc_billing.parse_args()
+
+        return BillingPut(args)
+    @customer_ns.response(200, 'Billing address successfully deleted')
+    @customer_ns.expect(delete_billing_parser)
+    def delete(self):
+        '''
+        Deletes one of the user's billing addresses
+        '''
+        args = delete_billing_parser.parse_args()
+
+        return BillingDelete(args)
+
+#########################################################
+#   Shipping section
+#########################################################
+
+
+@customer_ns.route("/shipping")  #pagename:port/customer/shipping
+class CustomerShippingOptions(Resource):
+    @customer_ns.response(200, 'Shipping address succesfully created')
+    @customer_ns.expect(add_acc_shipping)
+    def post(self):
+        '''
+        Creates new shipping address
+        '''
+        args = add_acc_shipping.parse_args()
+
+        return ShippingPost(args)
+
+    @customer_ns.response(200, 'Shipping address succesfully updated')
+    @customer_ns.expect(upd_acc_shipping)
+    def put(self):
+        '''
+        Updates a shipping address
+        '''
+        args = upd_acc_shipping.parse_args()
+        return ShippingPut(args)
+
+    @customer_ns.expect(delete_shipping_parser)
+    def delete(self):
+        '''
+        Deletes one of the user's shipping addresses
+        '''
+        args = delete_shipping_parser.parse_args()
+        return ShippingDelete(args)
