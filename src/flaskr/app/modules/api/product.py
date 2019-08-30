@@ -62,6 +62,7 @@ class Product(Resource):
         page = 0 if not args['page'] else args['page']
         response = jsonify({
             "statusCode": 200,
+            "message": "Success",
             "data": {
                 "sort": sort,
                 "filter": filter,
@@ -69,37 +70,6 @@ class Product(Resource):
             }
         })
         return response
-
-    # Old way to do it, new one may be longer but works flawlessly with optional parameters while the old one fails to respond in swagger
-    # @any_ns.route("/")
-    # class Product(Resource):
-    #     # This implemets the GET over the route
-    #     def get(self):
-    #         # This adds a description of the method to the documentation. Make it as descriptive as possible.
-    #         """
-    #         Returns a list of products
-    #         """
-    #         #To build a response we jsonify it
-    #         response = jsonify({"statusCode":200})
-    #         return response
-    # # This responds to www.servername.com:5000/namespace/1/filter_sample/1
-    # # This route accepts parameters which can be passed on to the GET
-    # # In this case /Products/1/filter_sample/1
-    # @any_ns.route("/<int:sort>/<string:filter>/<int:page>/")
-    # class UserProducts(Resource):
-    #     # This is how you document a parameter for get views / views that get parameters from route
-    #     # All the parameters from routes are required.
-    #     @any_ns.param('filter', 'A comma separated string of all the filters that apply')
-    #     @any_ns.param('sort','The ID of the sorting method to be used.')
-    #     @any_ns.param('page', 'The page requested (Default: 0)')
-    #     # The parameters get passed on to the function like this. Name must match the <type:name>
-    #     def get(self, sort, filter, page):
-    #         """
-    #         Returns a sorted and filtered list of products
-    #         """
-    #         # We reply with data in this case.
-    #         response = jsonify({"statusCode":200, "data":{"sort":sort, "filter":filter, "page":page}})
-    #         return response
 
 
 # Admin Section
@@ -173,7 +143,7 @@ product_delete_parser.add_argument('id',
 @admin_ns.response(403, "User is not an admin")
 class AdminProducts(Resource):
     # This is how you document a per-action response, in this case, this is exclusive to the POST method
-    @admin_ns.response(201, 'Product succesfully created')
+    @admin_ns.response(200, 'Product succesfully created')
     # This is how you make the endpoint expect something in the DATA field of the message.
     # You give it the parser corresponding to the action.
     @admin_ns.expect(product_add_parser)
@@ -196,6 +166,7 @@ class AdminProducts(Resource):
 
         response = jsonify({
             "statusCode": 200,
+            "message": "Successfully created a product",
             "data": {
                 "name": name,
                 "price": price,
@@ -205,7 +176,7 @@ class AdminProducts(Resource):
         })
         return response
 
-    @admin_ns.response(204, 'Product successfully updated')
+    @admin_ns.response(200, 'Product successfully updated')
     @admin_ns.expect(product_update_parser)
     def put(self):
         '''
@@ -223,6 +194,7 @@ class AdminProducts(Resource):
 
         response = jsonify({
             "statusCode": 200,
+            "message": "Successfully updated a product",
             "data": {
                 "id": pId,
                 "name": name,
@@ -233,7 +205,7 @@ class AdminProducts(Resource):
         })
         return response
 
-    @admin_ns.response(204, 'Product sucessfully deleted')
+    @admin_ns.response(200, 'Product sucessfully deleted')
     @admin_ns.expect(product_delete_parser)
     def delete(self):
         '''
@@ -242,5 +214,11 @@ class AdminProducts(Resource):
         args = product_delete_parser.parse_args()
         pId = args['id']
 
-        response = jsonify({"statusCode": 200, "data": {"id": pId}})
+        response = jsonify({
+            "statusCode": 200,
+            "message": "Successfully deleted a product",
+            "data": {
+                "id": pId
+            }
+        })
         return response
