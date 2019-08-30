@@ -23,20 +23,24 @@ get_cart_parser.add_argument(
 # This responds to www.servername.com:5000/carts/
 @any_ns.route("/")
 @any_ns.response(401, "Invalid or missing credentials")
-@any_ns.response(404, "Cart not found")
 class Cart(Resource):
     @any_ns.response(200, "Cart was found")
-    @any_ns.response(201, "Cart was created")
     @any_ns.expect(get_cart_parser)
     #To be defined
-    def put(self):
+    def get(self):
         '''
         Returns the user's cart based on their JWT token.
         '''
         args = get_cart_parser.parse_args()
         token = args['Authorization']
 
-        return jsonify({"statusCode": 200, "data": {"Auth": token}})
+        return jsonify({
+            "statusCode": 200,
+            "message": "OK",
+            "data": {
+                "Auth": token
+            }
+        })
 
 
 add_remove_item_parser = any_ns.parser()
@@ -72,15 +76,14 @@ update_item_parser.add_argument(
 
 @any_ns.route("/update/")
 @any_ns.response(401, "Invalid or missing credentials")
-@any_ns.response(404, "Cart not found")
 @any_ns.response(400, "Product ID does not exist")
 class UCart(Resource):
-    @any_ns.response(304, "Product already exists in cart")
     @any_ns.response(200, "Product successfully added to the cart")
     @any_ns.expect(add_remove_item_parser)
     def post(self):
         '''
         Adds a new item to the user's cart (Item must not exist in the cart)
+        If the item already exists in the cart this responds with a message that states No changes. 
         '''
         args = add_remove_item_parser.parse_args()
         token = args['Authorization']
@@ -88,6 +91,7 @@ class UCart(Resource):
 
         return jsonify({
             "statusCode": 200,
+            "message": "No changes",
             "data": {
                 "Auth": token,
                 "product_id": pid
@@ -110,7 +114,7 @@ class UCart(Resource):
         quantity = args['quantity']
 
         code = 200 if quantity > 0 else 406
-
+        msg = "OK" if quantity > 0 else "Less than 1"
         return jsonify({
             "statusCode": code,
             "data": {
@@ -133,6 +137,7 @@ class UCart(Resource):
 
         return jsonify({
             "statusCode": 200,
+            "message": "",
             "data": {
                 "Auth": token,
                 "product_id": pid

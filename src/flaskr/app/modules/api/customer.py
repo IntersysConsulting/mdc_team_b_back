@@ -7,16 +7,16 @@ from datetime import datetime
 
 guest_ns = Namespace(
     "customers/guest",
-    description="APIs for customer data for unregistered users")
+    description="Endpoints that allow users to work with guest accounts")
 customer_ns = Namespace(
-    "customers", description="APIs for customer data for registered users")
+    "customers", description="Endpoints that interact with guest and customer accounts")
 
 #########################################################
 #   Guest Account section
 #########################################################
 
 update_guest_info_parser = guest_ns.parser()
-update_guest_info_parser.add_argument('token',
+update_guest_info_parser.add_argument('Authorization',
                                       help='Guest token',
                                       required=True,
                                       location='headers')
@@ -70,7 +70,7 @@ class GuestOptions(Resource):
         When a guest wants to finish a purchase we get their information to be stored in their guest account. 
         '''
         args = update_guest_info_parser.parse_args()
-        token = args['token']
+        token = args['Authorization']
         first_name = args['first_name']
         last_name = args['last_name']
         email = args['email']
@@ -102,7 +102,7 @@ class GuestOptions(Resource):
 
 create_new_acc_parser = customer_ns.parser()
 create_new_acc_parser.add_argument(
-    'token',
+    'Authorization',
     help='Token the guest had before making their account.',
     required=True,
     location='headers')
@@ -128,7 +128,7 @@ create_new_acc_parser.add_argument('phone',
                                    location='form')
 
 get_acc_details = customer_ns.parser()
-get_acc_details.add_argument('token',
+get_acc_details.add_argument('Authorization',
                              help='Customer token',
                              required=True,
                              location='headers')
@@ -178,7 +178,7 @@ class CustomerOptions(Resource):
         Excludes information like password, TOS timestamp, account creation timestamp and cart id since they're unnecessary for our customer. 
         """
         args = get_acc_details.parse_args()
-        token = args['token']
+        token = args['Authorization']
 
         #Here we get all the customer account details. Then we probably save it on backend.
         response = jsonify({"statusCode": 200,
@@ -190,10 +190,10 @@ class CustomerOptions(Resource):
 #########################################################
 
 add_acc_billing = customer_ns.parser()
-add_acc_billing.add_argument('token',
+add_acc_billing.add_argument('Authorization',
                              help='Customer token',
                              required=True,
-                             location='Headers')
+                             location='headers')
 add_acc_billing.add_argument('billing',
                              help='Billing address JSON object',
                              required=True,
@@ -205,7 +205,7 @@ add_acc_billing.add_argument(
     location='form')
 
 upd_acc_billing = customer_ns.parser()
-upd_acc_billing.add_argument('token',
+upd_acc_billing.add_argument('Authorization',
                              help='Customer token',
                              required=True,
                              location='form')
@@ -225,10 +225,10 @@ upd_acc_billing.add_argument(
     location='form')
 
 delete_billing_parser = customer_ns.parser()
-delete_billing_parser.add_argument('token',
+delete_billing_parser.add_argument('Authorization',
                                     help="Customer Token",
                                     required=True,
-                                    location='Headers')
+                                    location='headers')
 delete_billing_parser.add_argument('billing',
                                     help="JSON object of the address to be deleted",
                                     required=True,
@@ -244,7 +244,7 @@ class CustomerBillingOptions(Resource):
         Creates new billing address
         '''
         args = add_acc_billing.parse_args()
-        token = args['token']
+        token = args['Authorization']
         billing = args['billing']
         is_default = args['is_default']
 
@@ -266,7 +266,7 @@ class CustomerBillingOptions(Resource):
         Updates a billing address
         '''
         args = upd_acc_billing.parse_args()
-        token = args['token']
+        token = args['Authorization']
         old_billing = args['old_billing_address']
         billing = args['billing']
         is_default = args['is_default']
@@ -289,7 +289,7 @@ class CustomerBillingOptions(Resource):
         Deletes one of the user's billing addresses
         '''
         args = delete_billing_parser.parse_args()
-        token = args['token']
+        token = args['Authorization']
         billing = args['billing']
         response = jsonify({
             "statusCode": 200,
@@ -307,7 +307,7 @@ class CustomerBillingOptions(Resource):
 #########################################################
 
 add_acc_shipping = customer_ns.parser()
-add_acc_shipping.add_argument('token',
+add_acc_shipping.add_argument('Authorization',
                               help='Customer token',
                               required=True,
                               location='form')
@@ -322,7 +322,7 @@ add_acc_shipping.add_argument(
     location='form')
 
 upd_acc_shipping = customer_ns.parser()
-upd_acc_shipping.add_argument('token',
+upd_acc_shipping.add_argument('Authorization',
                               help='Customer token',
                               required=True,
                               location='form')
@@ -342,10 +342,10 @@ upd_acc_shipping.add_argument(
     location='form')
 
 delete_shipping_parser = customer_ns.parser()
-delete_shipping_parser.add_argument('token',
+delete_shipping_parser.add_argument('Authorization',
                                    help="Customer Token",
                                    required=True,
-                                   location='Headers')
+                                   location='headers')
 delete_shipping_parser.add_argument(
     'shipping',
     help="JSON object of the address to be deleted",
@@ -362,7 +362,7 @@ class CustomerShippingOptions(Resource):
         Creates new shipping address
         '''
         args = add_acc_shipping.parse_args()
-        token = args['token']
+        token = args['Authorization']
         shipping = args['shipping']
         is_default = args['is_default']
 
@@ -384,7 +384,7 @@ class CustomerShippingOptions(Resource):
         Updates a shipping address
         '''
         args = upd_acc_shipping.parse_args()
-        token = args['token']
+        token = args['Authorization']
         old_shipping = args['old_shipping_address']
         shipping = args['shipping']
         is_default = args['is_default']
@@ -407,7 +407,7 @@ class CustomerShippingOptions(Resource):
         Deletes one of the user's shipping addresses
         '''
         args = delete_shipping_parser.parse_args()
-        token = args['token']
+        token = args['Authorization']
         shipping = args['shipping']
         response = jsonify({
             "statusCode": 200,

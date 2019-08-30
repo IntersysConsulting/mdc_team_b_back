@@ -26,9 +26,11 @@ from werkzeug.datastructures import FileStorage
 
 # This makes the API respond to www.servername.com:5000/namespace
 # It will help with the endpoints. Trust me.
-any_ns = Namespace("products", description="APIs that work with products")
-admin_ns = Namespace("admin/products",
-                     description="Admin APIs that work with products")
+any_ns = Namespace(
+    "products", description="Endpoints that give information about products")
+admin_ns = Namespace(
+    "admin/products",
+    description="Endpoints that allow admins to manage products")
 
 # Customer Section
 
@@ -81,6 +83,10 @@ class Product(Resource):
 #Add product
 product_add_parser = admin_ns.parser()
 # location = 'form' Means it is expected in the data field of the HTTP request
+product_add_parser.add_argument('Authorization',
+                                help="Admin's token",
+                                required=True,
+                                location="headers")
 product_add_parser.add_argument('name',
                                 help='Name of the product to be added',
                                 required=True,
@@ -102,6 +108,10 @@ product_add_parser.add_argument('description',
 
 #Update product
 product_update_parser = admin_ns.parser()
+product_update_parser.add_argument('Authorization',
+                                   help="Admin's token",
+                                   required=True,
+                                   location="headers")
 product_update_parser.add_argument('id',
                                    type=int,
                                    help='ID of the product to be updated',
@@ -129,6 +139,10 @@ product_update_parser.add_argument(
 
 #Delete product
 product_delete_parser = admin_ns.parser()
+product_delete_parser.add_argument('Authorization',
+                                   help="Admin's token",
+                                   required=True,
+                                   location="headers")
 product_delete_parser.add_argument('id',
                                    type=int,
                                    help='ID of the product to be deleted',

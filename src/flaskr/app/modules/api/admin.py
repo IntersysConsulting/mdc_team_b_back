@@ -3,11 +3,15 @@ from flask_restplus import Resource, fields, Namespace
 from ..resources.admin import AdminManagement
 from werkzeug.datastructures import FileStorage
 
-admin_ns = Namespace("admin/management",
-                     description="APIs for administration of store admins ")
+admin_ns = Namespace(
+    "admin/management",
+    description="Endpoints that allows admins to manage the store's staff")
 
 # Get admins
 get_admin = admin_ns.parser()
+get_admin.add_argument('Authorization',
+                       help="Admin's session token",
+                       required=True)
 get_admin.add_argument('sort',
                        type=int,
                        help='ID of the Sorting method to be used',
@@ -35,6 +39,9 @@ add_admin.add_argument(
 
 #Update admin
 update_admin = admin_ns.parser()
+update_admin.add_argument('Authorization',
+                          help="Admin's session token",
+                          required=True)
 update_admin.add_argument('id',
                           type=int,
                           help='ID of the admin that will be updated',
@@ -59,6 +66,9 @@ update_admin.add_argument('new_password',
 
 #Delete admin
 delete_admin = admin_ns.parser()
+delete_admin.add_argument('Authorization',
+                          help="Admin's session token",
+                          required=True)
 delete_admin.add_argument('id',
                           type=int,
                           help='ID of the admin to be deleted',
@@ -67,7 +77,6 @@ delete_admin.add_argument('id',
 
 
 @admin_ns.route("/")
-@admin_ns.response(404, " Admin not found")
 @admin_ns.response(403, "Forbidden - User is not an admin")
 class Admin(Resource):
     @admin_ns.expect(get_admin)
