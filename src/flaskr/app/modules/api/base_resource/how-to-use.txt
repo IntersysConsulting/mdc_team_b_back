@@ -1,0 +1,79 @@
+This is the base resource to create a new endpoint.
+To create a new endpoint you will want to copy this folder into the api folder and rename it to whatever the new resource name is.
+Don't include this file in every new resource you make. 
+
+/app
+    /modules
+        /api
+            /my_new_resource
+                - __init__.py
+                - get.py
+                - post.py
+                - put.py
+                - delete.py
+
+If your resource is accessible by multiple users you should have it like this: 
+
+/app
+    /modules
+        /api
+            /my_new_resource
+                - __init__.py
+                /admin
+                    - get.py
+                    - post.py
+                    - put.py
+                    - delete.py
+                /customer
+                    - get.py
+                    - post.py
+                    - put.py
+                    - delete.py
+                /guest
+                    - get.py
+                    - post.py
+                    - put.py
+                    - delete.py
+
+(Consider only having the files that are necessary, don't have guest.put if there is no endpoint method that uses it)
+
+All the files in this folder have a template of what they should contain, but here's a rundown of what should be in each one of them. 
+
+> __init__.py
+    Here we define the namespaces, document them, and implement basic, non-mutable functionality that requires direct interaction with wrappers like @require_auth.
+    Your file should be structured like:
+        > Generic Imports
+        > .Get, .Post, .Put, .Delete imports 
+        > Namespace definition
+        > Sections ordered by most accessible to least accessible (Guest->Customer->Admin)
+            > Get, Post, Put, Delete methods per route. (Try to keep this order)
+                > Each of these methods must have the '''documentation''', an args = parser.parse_args() and a return Method(args), where Method is imported from the .Get/.Post,etc...
+        > If your resource is accessible by multiple kind of users you should import your methods like:
+            from .admin.get import Get as AdminGet, Parser as admin_get_resource_parser 
+        
+    Do not:
+        - Implement any parsers here
+        - Implement any logic on the endpoints
+
+> get.py / post.py / put.py / delete.py 
+    Here we define logic for this resource. In case it is within admin/get.py it would implement the GET logic for admins only.
+    This file must contain only one Parser and one Method referencing the name of the file.
+    The method must be named after the file: Get for get.py
+    The method must expect args that are already parsed by the parser. 
+        The args are accessible as args['name_of_parameter'] whereas 'name_of_parameter' is defined in the parser
+    If the method requires a file as argument you have to include: 
+        from werkzeug.datastructures import FileStorage
+    
+    Your file should be structured like: 
+
+    > Imports
+    > Parser
+    > Parser.add_argument()
+    > Method
+
+    Include comments as you see fit
+
+    Do not:
+        - Try to document this file for Swagger
+        - Try to import the namespace (Circle-referencing)
+        
