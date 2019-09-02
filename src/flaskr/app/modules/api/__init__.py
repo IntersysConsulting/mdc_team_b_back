@@ -1,3 +1,4 @@
+from flask import Blueprint
 from flask_restplus import Api, Namespace, Resource
 # When you finish your class, add it under this one.
 from .product import any_ns as product_any, admin_ns as product_admin
@@ -7,8 +8,10 @@ from .customer import guest_ns as customer_guest, customer_ns as customer_user
 # from .admin import admin_ns as management_admin
 from .admin import admin_ns as management_admin
 
+v1_blueprint = Blueprint('api', __name__, url_prefix='/api/v1')
 # Keep this as is for now
-api = Api(version="1.0",
+api = Api(v1_blueprint,
+          version="1.0",
           title="eCommerce API",
           description="Bundle of API that feed the eCommerce website")
 
