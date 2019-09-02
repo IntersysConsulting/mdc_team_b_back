@@ -10,7 +10,7 @@ any_ns = Namespace(
     "carts",
     description=
     "Endpoints that allow users to interact with their carts based on their session token."
-) 
+)
 
 ###################################
 # Customer Section
@@ -32,18 +32,8 @@ class Cart(Resource):
         args = get_cart_parser.parse_args()
         return Get(args)
 
-
-################################### End Route
-
-
-@any_ns.route("/update/")
-@any_ns.response(401, "Invalid or missing credentials")
-@any_ns.response(400, "Product ID does not exist")
-class UpdateCart(Resource):
-    #############
-    # POST
-    #############
     @any_ns.response(200, "Product successfully added to the cart")
+    @any_ns.response(400, "Product ID does not exist")
     @any_ns.expect(add_item_parser)
     def post(self):
         '''
@@ -61,6 +51,7 @@ class UpdateCart(Resource):
         "The new quantity for the product is less than 1. Did you mean to use DELETE?"
     )
     @any_ns.response(200, "Product quantity successfully updated")
+    @any_ns.response(400, "Product ID does not exist")
     @any_ns.expect(update_item_parser)
     def put(self):
         '''
@@ -74,6 +65,7 @@ class UpdateCart(Resource):
     #############
     @any_ns.response(204, "Product was not in the cart")
     @any_ns.response(200, "Product was deleted successfully from the cart")
+    @any_ns.response(400, "Product ID does not exist")
     @any_ns.expect(delete_item_parser)
     def delete(self):
         '''
