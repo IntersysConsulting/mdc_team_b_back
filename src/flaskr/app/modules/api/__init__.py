@@ -31,7 +31,7 @@ api.add_namespace(product_any)
 #   Admin Namespaces
 ###################################
 api.add_namespace(management_admin)
-api.add_namespace(product_admin)
 api.add_namespace(order_admin)
+api.add_namespace(product_admin)
 
 # We will probably add in Blueprinting for versioning of API, but Blueprinting for now should be unnecessary

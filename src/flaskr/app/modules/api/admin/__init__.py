@@ -18,7 +18,7 @@ class Admin(Resource):
     @admin_ns.expect(get_admin_parser)
     def get(self):
         '''
-        Returns currently registered admins. Might be sorted A-Z, Z-A, oldest first, newest first.
+        Returns currently registered admins. May be sorted A-Z, Z-A, oldest first, newest first.
         '''
         args = get_admin_parser.parse_args()
         return Get(args)
@@ -36,7 +36,7 @@ class Admin(Resource):
     @admin_ns.expect(update_admin_parser)
     def put(self):
         '''
-        Updates and existing admin information
+        Updates the issuing admin's information
         '''
         args = update_admin_parser.parse_args()
         return Put(args)

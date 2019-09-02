@@ -6,16 +6,16 @@ from werkzeug.datastructures import FileStorage
 from datetime import datetime
 from .get import Get, Parser as get_account_parser
 from .post import Post, Parser as add_account_parser
+from .put import Put as Put, Parser as update_account_parser
 from .guest.post import Post as GuestPost
-from .guest.put import Put as GuestPut, Parser as update_guest_parser
 from .billing.post import Post as BillingPost, Parser as add_billing_parser
-from .billing.put import Put as BillingPut , Parser as update_billing_parser
-from .billing.delete import Delete as BillingDelete , Parser as delete_billing_parser
+from .billing.put import Put as BillingPut, Parser as update_billing_parser
+from .billing.delete import Delete as BillingDelete, Parser as delete_billing_parser
 from .shipping.post import Post as ShippingPost, Parser as add_shipping_parser
 from .shipping.put import Put as ShippingPut, Parser as update_shipping_parser
 from .shipping.delete import Delete as ShippingDelete, Parser as delete_shipping_parser
 
-guest_ns = Namespace( 
+guest_ns = Namespace(
     "customers/guest",
     description="Endpoints that allow users to work with guest accounts")
 customer_ns = Namespace(
@@ -34,16 +34,6 @@ class GuestOptions(Resource):
         Creates guest account so guest can use a cart
         '''
         return GuestPost()
-
-    @guest_ns.response(200, 'Successfully updated guest information')
-    @guest_ns.expect(update_guest_parser)
-    def put(self):
-        '''
-        When a guest wants to finish a purchase we get their information to be stored in their guest account. 
-        '''
-        args = update_guest_parser.parse_args()
-
-        return GuestPut(args)
 
 
 #########################################################
@@ -76,9 +66,21 @@ class CustomerOptions(Resource):
 
         return Get(args)
 
+    @customer_ns.response(200, 'Successfully updated guest information')
+    @customer_ns.expect(update_account_parser)
+    def put(self):
+        '''
+        When a guest wants to finish a purchase we get their information to be stored in their guest account. 
+        '''
+        args = update_account_parser.parse_args()
+
+        return Put(args)
+
+
 #########################################################
 #   Billing section
 #########################################################
+
 
 @customer_ns.route("/billing")  #pagename:port/customer/billing
 class CustomerBillingOptions(Resource):
@@ -101,6 +103,7 @@ class CustomerBillingOptions(Resource):
         args = update_billing_parser.parse_args()
 
         return BillingPut(args)
+
     @customer_ns.response(200, 'Billing address successfully deleted')
     @customer_ns.expect(delete_billing_parser)
     def delete(self):
@@ -110,6 +113,7 @@ class CustomerBillingOptions(Resource):
         args = delete_billing_parser.parse_args()
 
         return BillingDelete(args)
+
 
 #########################################################
 #   Shipping section

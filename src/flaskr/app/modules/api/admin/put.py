@@ -8,11 +8,6 @@ Parser = RequestParser()
 Parser.add_argument('Authorization',
                     help="Admin's session token",
                     required=True)
-Parser.add_argument('id',
-                    type=int,
-                    help='ID of the admin that will be updated',
-                    required=True,
-                    location='form')
 Parser.add_argument('current_password',
                     help='Current password of admin',
                     required=True,
