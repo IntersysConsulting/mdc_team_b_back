@@ -4,6 +4,7 @@ from .product import any_ns as product_any, admin_ns as product_admin
 from .order import user_ns as order_user, admin_ns as order_admin
 from .cart import any_ns as cart_any
 from .customer import guest_ns as customer_guest, customer_ns as customer_user
+# from .admin import admin_ns as management_admin
 from .admin import admin_ns as management_admin
 
 # Keep this as is for now
