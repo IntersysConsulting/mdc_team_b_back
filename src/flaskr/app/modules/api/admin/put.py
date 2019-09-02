@@ -31,7 +31,6 @@ Parser.add_argument('new_password',
 
 
 def Put(args):
-    admin_id = args['id']
     current_password = args['current_password']
     first_name = args['first_name']
     last_name = args['last_name']
@@ -41,7 +40,6 @@ def Put(args):
         "statusCode": 200,
         "message": "Successfully updated admin",
         "data": {
-            "id": admin_id,
             "current_password": current_password,
             "first_name": first_name,
             "last_name": last_name,
