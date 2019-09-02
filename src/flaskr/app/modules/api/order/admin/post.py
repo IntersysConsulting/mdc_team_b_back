@@ -11,6 +11,6 @@ Parser = RequestParser()
 #################
 
 
-def Delete(args):
+def Post(args):
 
     return response

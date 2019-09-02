@@ -10,7 +10,7 @@ any_ns = Namespace(
     "carts",
     description=
     "Endpoints that allow users to interact with their carts based on their session token."
-)
+) 
 
 ###################################
 # Customer Section

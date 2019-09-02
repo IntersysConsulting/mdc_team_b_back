@@ -22,13 +22,13 @@ api = Api(version="1.0",
 api.add_namespace(cart_any)
 api.add_namespace(customer_user)
 api.add_namespace(customer_guest)
-# api.add_namespace(order_user)
-# api.add_namespace(product_any)
+api.add_namespace(order_user)
+api.add_namespace(product_any)
 ###################################
 #   Admin Namespaces
 ###################################
 api.add_namespace(management_admin)
-# api.add_namespace(product_admin)
-# api.add_namespace(order_admin)
+api.add_namespace(product_admin)
+api.add_namespace(order_admin)
 
 # We will probably add in Blueprinting for versioning of API, but Blueprinting for now should be unnecessary
