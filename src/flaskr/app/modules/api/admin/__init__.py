@@ -7,12 +7,16 @@ from .post import Post, Parser as add_admin_parser
 from .put import Put, Parser as update_admin_parser
 from .delete import Delete, Parser as delete_admin_parser
 
+from ...auth import authorizations
+
 admin_ns = Namespace(
     "admin/management",
+    authorizations=authorizations,
     description="Endpoints that allows admins to manage the store's staff")
 
 
 @admin_ns.route("/")
+@admin_ns.doc(security="jwt")
 @admin_ns.response(403, "Forbidden - User is not an admin")
 class Admin(Resource):
     @admin_ns.expect(get_admin_parser)
