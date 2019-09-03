@@ -24,4 +24,4 @@ ENV FLASK_APP flaskr
 
 EXPOSE 5000:5000
 
-CMD python entrypoint.py
+CMD python entrypoint.py --execute
