@@ -26,3 +26,4 @@ Unipath==1.1
 Werkzeug==0.15.5
 wrapt==1.11.2
 yapf==0.28.0
+PyYAML==5.1.2
