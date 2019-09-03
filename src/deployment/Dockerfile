@@ -14,6 +14,7 @@ WORKDIR /usr/src/app
 
 COPY ./requirements.txt ./
 COPY ./entrypoint.py ./
+COPY ./config.yaml ./
 COPY ./flaskr ./flaskr
 
 RUN pip install --upgrade pip && \
@@ -23,4 +24,4 @@ ENV FLASK_APP flaskr
 
 EXPOSE 5000:5000
 
-CMD python entrypoint.py --host "0.0.0.0" 
+CMD python entrypoint.py
