@@ -1,8 +1,12 @@
 import os
 from flask import Flask, redirect
+from flask_jwt_extended import JWTManager
 from modules.api import api, v1_blueprint
 
 app = Flask(__name__)
+
+app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
+jwt = JWTManager(app)
 # api.init_app(app)
 app.register_blueprint(v1_blueprint)
 

@@ -1,5 +1,5 @@
 from flask import jsonify
-from flask_restplus import Resource, fields, Namespace
+from flask_restplus import Resource, fields, Namespace, reqparse
 
 from .customer.post import Post as CustomerPost, Parser as customer_login_parser
 from .customer.delete import Delete as CustomerDelete, Parser as customer_logout_parser

@@ -3,6 +3,9 @@ from flask_restplus import Resource
 from ...db import Database
 from .schema import AdminSchema
 
+from datetime import datetime
+from passlib.hash import pbkdf2_sha256 as sha256
+
 # This section is a draft for ideas, will be formally worked on later on.
 
 
@@ -10,11 +13,11 @@ class PasswordManagement:
     def __init__(self):
         self.todo = "Handle additional methods used for administration of passwords"
 
-    def generate_password(self):
-        pass
+    def generate_password(self, password):
+        return sha256.hash(password)
 
-    def hash_pass(self, password):
-        pass
+    def verify_hash(self, password, hash):
+        return sha256.verify(password, hash)
 
 
 class AdminManagement:
@@ -38,14 +41,13 @@ class AdminManagement:
     def get_all_admins(self):
         pass
 
-    def create_admin(self, first_name, last_name, email, password):
-        admin = self.db.create(self.collection_name, ({
+    def create_admin(self, first_name, last_name, email):
+        print('intentando crear admin')
+        admin = self.db.create(self.collection_name, ( {
             "email": email,
             "first_name": first_name,
-            "last_name": last_name,
-            "password": password
-        }))
-        print(self.dump(admin))
+            "last_name": last_name
+        } ))
         return self.dump(admin)
 
     def delete_admin(self, id, email=None):
