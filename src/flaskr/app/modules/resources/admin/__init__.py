@@ -46,7 +46,8 @@ class AdminManagement:
         admin = self.db.create(self.collection_name, ( {
             "email": email,
             "first_name": first_name,
-            "last_name": last_name
+            "last_name": last_name,
+            "password": "m"
         } ))
         return self.dump(admin)
 
