@@ -3,6 +3,7 @@ from flask_restplus import Resource
 from ...db import Database
 from .schema import AdminSchema
 
+import json
 from datetime import datetime
 from passlib.hash import pbkdf2_sha256 as sha256
 
@@ -41,13 +42,17 @@ class AdminManagement:
     def get_all_admins(self):
         pass
 
-    def create_admin(self, first_name, last_name, email):
-        print('intentando crear admin')
+    def create_admin(self, first_name, last_name, email, access):
         admin = self.db.create(self.collection_name, ( {
             "email": email,
             "first_name": first_name,
             "last_name": last_name,
-            "password": "m"
+            "password": "c",
+            "reset_token": {
+                "codeAccess": access,
+                # 'create_at': ''
+            },
+            # "last_login": ''
         } ))
         return self.dump(admin)
 
@@ -64,6 +69,13 @@ class AdminManagement:
 
     def update_admin(self, id, name, password, comment=""):
         pass
+
+    def update_password(self,email, new_password):
+        # updated = self.db.update({email:email}, {$set: {password: new_password}})
+
+        new_password = {"$set": { "password": new_password } }
+        email = { "first_name": email }
+        updated = self.db.update(self.collection_name, email, new_password)
 
     def dump(self, data):
         return AdminSchema(exclude=['_id']).dump(data).data

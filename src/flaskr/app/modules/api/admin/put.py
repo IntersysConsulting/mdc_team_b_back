@@ -1,5 +1,6 @@
 from flask import jsonify
 from flask_restplus.namespace import RequestParser
+from ...resources.admin  import AdminManagement
 
 #################
 # Parser        #
@@ -35,6 +36,16 @@ def Put(args):
     first_name = args['first_name']
     last_name = args['last_name']
     new_password = '' if not args['new_password'] else args['new_password']
+
+    # codeAccess = args['codeAccess']
+    # email = args['email']
+
+    am = AdminManagement()
+
+    # admin = am.find_admin(email)
+    # if admin['codeAccess'] == codeAccess:
+    # am.update_password(email, new_password)
+    am.update_password(first_name, new_password)
 
     response = jsonify({
         "statusCode": 200,

@@ -1,0 +1,33 @@
+* {
+  font-family: 'Open Sans', sans-serif;
+}
+
+.container {
+  border: solid 4px #116CB4;
+  width: 100%;
+  padding-top: 0.5em;
+  margin: 0px;
+}
+
+.title {
+  font-size: 2em;
+  text-align: center;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background: #333;
+    background-image: linear-gradient(to right, #ccc, #333, #ccc);
+}
+
+.text {
+  font-size: 1.5em;
+}
+
+.link {
+  background-color: #F98F3E;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  margin: 0px;
+}

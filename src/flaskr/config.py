@@ -8,8 +8,6 @@ class Config(object):
     DEBUG = False
     TESTING = False
     SECRET_KEY = 'top-secret'
-    JWT_SECRET_KEY = SECRET_KEY
-
 
 class DevelopmentConfig(Config):
     DEBUG = True
