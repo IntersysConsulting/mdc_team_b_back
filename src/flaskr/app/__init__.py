@@ -1,6 +1,6 @@
 from flask import Flask
-from app.modules.db import Database
-from app.modules.api import api, v1_blueprint
+from modules.db import Database
+from modules.api import api, v1_blueprint
 
 db = Database()
 

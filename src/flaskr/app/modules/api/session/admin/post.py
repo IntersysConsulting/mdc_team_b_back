@@ -1,4 +1,5 @@
 from flask import jsonify
+from flask_restplus import Resource
 from ....resources.admin  import AdminManagement
 from flask_restplus.namespace import RequestParser
 from flask_jwt_extended import (create_access_token, create_refresh_token,
@@ -33,10 +34,15 @@ def Post(args):
         response = jsonify({
             "statusCode": 200,
             "message": "Successfully logged in",
-            "data": {
-                "acces_token": acces_token,
-                "refresh_token": refresh_token
-            }
+            "acces_token": acces_token,
+            "refresh_token": refresh_token,
         })
 
         return response
+
+class TokenRefresh(Resource):
+    @jwt_refresh_token_required
+    def getNewToken(self):
+        current_user = get_jwt_identity()
+        access_token = create_access_token(identity = current_user)
+        return {'access_token': access_token}

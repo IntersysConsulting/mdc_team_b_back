@@ -32,7 +32,6 @@ class AdminManagement:
             "email": email,
             "password": password
         })
-        print(self.dump(admin))
         return self.dump(admin)
 
     def find_admin(self, email):
@@ -79,3 +78,5 @@ class AdminManagement:
 
     def dump(self, data):
         return AdminSchema(exclude=['_id']).dump(data).data
+
+

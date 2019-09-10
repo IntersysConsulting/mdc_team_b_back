@@ -51,7 +51,8 @@ def Post(args):
 
         msg = Message("Welcome",
                       sender='itersysecommerce@gmail.com',
-                      recipients=["banda1915@gmail.com"])
+                      recipients=['banda1915@gmail'])
+                      # recipients=[email])
 
         with app.open_resource("../../../templates/logo.jpg") as fp:
             msg.attach('logo.jpg','image/jpg', fp.read(), 'inline', headers=[['Content-ID','<Myimage>'],])

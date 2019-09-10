@@ -5,6 +5,7 @@ from .customer.post import Post as CustomerPost, Parser as customer_login_parser
 from .customer.delete import Delete as CustomerDelete, Parser as customer_logout_parser
 from .admin.post import Post as AdminPost, Parser as admin_login_parser
 from .admin.delete import Delete as AdminDelete, Parser as admin_logout_parser
+from .admin.put import Put as AdminPut, Parser as admin_refresh_token_parser
 
 customer_ns = Namespace(
     "session",
@@ -54,3 +55,11 @@ class AdminSession(Resource):
         '''
         args = admin_logout_parser.parse_args()
         return AdminDelete(args)
+
+    @admin_ns.expect(admin_refresh_token_parser)
+    def put(self):
+        '''
+        Allows the admin refresh the token
+        '''
+        args = admin_logout_parser.parse_args()
+        return AdminPut(args)

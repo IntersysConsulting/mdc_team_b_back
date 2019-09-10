@@ -13,6 +13,7 @@ v1_blueprint = Blueprint('api', __name__, url_prefix='/api/v1')
 # Keep this as is for now
 api = Api(v1_blueprint,
           authorizations=authorizations,
+          security='jwt',
           version="1.0",
           title="eCommerce API",
           description="Bundle of API that feed the eCommerce website")
