@@ -46,7 +46,7 @@ class AdminManagement:
             "email": email,
             "first_name": first_name,
             "last_name": last_name,
-            "password": "c",
+            "password": "",
             "reset_token": {
                 "codeAccess": access,
                 # 'create_at': ''

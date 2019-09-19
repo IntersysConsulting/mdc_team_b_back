@@ -1,12 +1,15 @@
 import os
-from flask import Flask, redirect
+from flask_restplus import Api, Namespace, Resource
+from flask import Flask, redirect, Blueprint
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_mail import Mail
-from modules.api import api, v1_blueprint
+from modules.api import v1_blueprint
 from modules.resources.reset_token import RevokedTokenModel
 
-app = Flask(__name__)
 
+app = Flask(__name__)
+# CORS(app, resources={ r"*": { 'origins': 'http://localhost:3000' } })
 mail = Mail()
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -21,17 +24,13 @@ app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 
 jwt = JWTManager(app)
 
+# v1_blueprint = Blueprint('api', __name__, url_prefix='/api/v1/')
 app.register_blueprint(v1_blueprint)
 
 @jwt.token_in_blacklist_loader
 def check_if_token_in_blacklist(decrypted_token):
     jti = decrypted_token['jti']
     return RevokedTokenModel.is_jti_blacklisted(jti)
-
-@app.route('/')
-def redirect_to_default_api_swagger():
-    return redirect('/api/v1')
-
 
 if __name__ == "__main__":
     mail.init_app(app)

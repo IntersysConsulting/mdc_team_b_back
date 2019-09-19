@@ -1,5 +1,6 @@
-from flask import Blueprint
+from flask import Blueprint, make_response, request, current_app
 from flask_restplus import Api, Namespace, Resource
+from flask_cors import CORS
 # When you finish your class, add it under this one.
 from .product import any_ns as product_any, admin_ns as product_admin
 from .order import user_ns as order_user, admin_ns as order_admin
@@ -10,6 +11,9 @@ from .session import customer_ns as session_customer, admin_ns as session_admin
 from ..auth import authorizations
 
 v1_blueprint = Blueprint('api', __name__, url_prefix='/api/v1')
+cors = CORS(v1_blueprint, resorces={r'*': {"origins": '*'}})
+# CORS(v1_blueprint)
+
 # Keep this as is for now
 api = Api(v1_blueprint,
           authorizations=authorizations,
@@ -17,7 +21,6 @@ api = Api(v1_blueprint,
           version="1.0",
           title="eCommerce API",
           description="Bundle of API that feed the eCommerce website")
-
 # After you import your namespaces, import them into the API
 
 # Please load these in alphabetical order for Swagger
@@ -38,5 +41,3 @@ api.add_namespace(management_admin)
 api.add_namespace(order_admin)
 api.add_namespace(product_admin)
 api.add_namespace(session_admin)
-
-# We will probably add in Blueprinting for versioning of API, but Blueprinting for now should be unnecessary

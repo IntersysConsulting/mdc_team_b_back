@@ -1,4 +1,5 @@
 from flask import jsonify
+from flask import Blueprint, request
 from flask_restplus import Resource, fields, Namespace
 from ...resources.admin import AdminManagement
 # from werkzeug.datastructures import FileStorage
@@ -8,6 +9,7 @@ from .put import Put, Parser as update_admin_parser
 from .delete import Delete, Parser as delete_admin_parser
 
 from ...auth import authorizations
+from ...utils import getValues
 
 admin_ns = Namespace(
     "admin/management",
@@ -42,8 +44,11 @@ class Admin(Resource):
         '''
         Updates the issuing admin's information
         '''
-        args = update_admin_parser.parse_args()
-        return Put(args)
+        #type dictionary: {'{"email":"f@f.com","password":"a","code":"5053"}': ''}
+        data =  getValues(request.form.to_dict())
+
+        print(data)
+        return data['email']
 
     @admin_ns.response(200, 'Admin was sucessfully deleted')
     @admin_ns.expect(delete_admin_parser)
@@ -54,3 +59,5 @@ class Admin(Resource):
         args = delete_admin_parser.parse_args()
 
         return Delete(args)
+
+
