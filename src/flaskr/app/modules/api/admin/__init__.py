@@ -9,7 +9,6 @@ from .put import Put, Parser as update_admin_parser
 from .delete import Delete, Parser as delete_admin_parser
 
 from ...auth import authorizations
-from ...utils import getValues
 
 admin_ns = Namespace(
     "admin/management",
@@ -44,11 +43,7 @@ class Admin(Resource):
         '''
         Updates the issuing admin's information
         '''
-        #type dictionary: {'{"email":"f@f.com","password":"a","code":"5053"}': ''}
-        data =  getValues(request.form.to_dict())
-
-        print(data)
-        return data['email']
+        return Put(request.json)
 
     @admin_ns.response(200, 'Admin was sucessfully deleted')
     @admin_ns.expect(delete_admin_parser)
@@ -59,5 +54,3 @@ class Admin(Resource):
         args = delete_admin_parser.parse_args()
 
         return Delete(args)
-
-

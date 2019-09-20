@@ -2,9 +2,6 @@ from flask import jsonify
 from flask_restplus import Resource
 from ...db import Database
 from .schema import AdminSchema
-
-import json
-from datetime import datetime
 from passlib.hash import pbkdf2_sha256 as sha256
 
 # This section is a draft for ideas, will be formally worked on later on.
@@ -75,6 +72,12 @@ class AdminManagement:
         new_password = {"$set": { "password": new_password } }
         email = { "first_name": email }
         updated = self.db.update(self.collection_name, email, new_password)
+
+    def create_password(self,code, password):
+        user = self.db.find(self.collection_name, {"reset_token.codeAccess": int(code)})
+        updated = self.db.update(self.collection_name, {'_id': user['_id']}, { "$set":{"password": password} })
+        if updated:
+            return user['email']
 
     def dump(self, data):
         return AdminSchema(exclude=['_id']).dump(data).data

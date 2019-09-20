@@ -28,13 +28,13 @@ def Post(args):
 
     am = AdminManagement()
     if am.login_admin(email, password):
-        acces_token = create_access_token(identity=email)
+        access_token = create_access_token(identity=email)
         refresh_token = create_refresh_token(identity=email)
 
         response = jsonify({
             "statusCode": 200,
             "message": "Successfully logged in",
-            "acces_token": acces_token,
+            "access_token": access_token,
             "refresh_token": refresh_token,
         })
 
