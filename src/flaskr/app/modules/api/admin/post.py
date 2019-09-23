@@ -48,15 +48,12 @@ def Post(args):
         access = random.randint(1000, 10000)
         am.create_admin(first_name, last_name, email, access)
 
-
         msg = Message("Welcome",
                       sender='itersysecommerce@gmail.com',
                       recipients=['banda1915@gmail.com'])
-
         with app.open_resource("../../../templates/logo.jpg") as fp:
             msg.attach('logo.jpg','image/jpg', fp.read(), 'inline', headers=[['Content-ID','<Myimage>'],])
-        msg.html = render_template('email.html', code=access)
-
+        msg.html = render_template('email.html', code=access, email=email)
         mail = Mail()
         mail.send(msg)
 
@@ -69,9 +66,9 @@ def Post(args):
                 "password": "",
                 "reset_token": {
                     'codeAccess': access,
-                    # 'create_at': ''
+                    "tries": 0,
                 },
-                # "last_login": ''
+                "last_login": ''
             }
         })
     except Exception:

@@ -37,21 +37,8 @@ Parser.add_argument('new_password',
 
 def Put(args):
     am = AdminManagement()
-    if args['code']:
-        email = am.create_password(args['code'], args['password'])
-        access_token = create_access_token(identity=email)
-        refresh_token = create_refresh_token(identity=email)
-        response = jsonify({
-            "statusCode": 200,
-            "message": "Successfully created password admin",
-            "access_token": access_token,
-            "refresh_token": refresh_token
-        })
-        return response
-
-    response = jsonify({
-        "statusCode": 200,
-        "message": "Successfully updated admin",
-    })
+    response = jsonify({"": ""})
+    if args['code'] and args['email']:
+        response = am.create_password(args['code'], args['password'], args['email'])
 
     return response

@@ -3,6 +3,7 @@ from flask_restplus import Resource
 from ...db import Database
 from .schema import AdminSchema
 from passlib.hash import pbkdf2_sha256 as sha256
+from flask_jwt_extended import (create_access_token, create_refresh_token)
 
 # This section is a draft for ideas, will be formally worked on later on.
 
@@ -46,9 +47,10 @@ class AdminManagement:
             "password": "",
             "reset_token": {
                 "codeAccess": access,
-                # 'create_at': ''
+                "tries": 0,
             },
-            # "last_login": ''
+            "last_login": '',
+            "enable": 1
         } ))
         return self.dump(admin)
 
@@ -73,13 +75,34 @@ class AdminManagement:
         email = { "first_name": email }
         updated = self.db.update(self.collection_name, email, new_password)
 
-    def create_password(self,code, password):
-        user = self.db.find(self.collection_name, {"reset_token.codeAccess": int(code)})
-        updated = self.db.update(self.collection_name, {'_id': user['_id']}, { "$set":{"password": password} })
-        if updated:
-            return user['email']
+    def create_password(self,code, password, email):
+        user = self.db.find(self.collection_name, {"email": email})
+        response = jsonify({"": ""})
+        if user and user['enable'] == 1:
+            if user['reset_token']['codeAccess'] == int(code):
+                updated = self.db.update(self.collection_name, {'_id': user['_id']}, { "$set":{"password": password} })
+                access_token = create_access_token(identity=user['email'])
+                refresh_token = create_refresh_token(identity=user['email'])
+                response = jsonify({
+                    "statusCode": 200,
+                    "message": "Successfully created password admin",
+                    "access_token": access_token,
+                    "refresh_token": refresh_token
+                })
+            elif user['reset_token']['tries'] < 2:
+                self.db.update(self.collection_name, {'_id': user['_id']}, { "$set":{"reset_token.tries": ttry}})
+                response = jsonify({
+                    "statusCode": 200,
+                    "message": "Your code access isn't valid, please make another attempt",
+                })
+            else:
+                self.db.update(self.collection_name, {'_id': user['_id']}, { "$set":{"enable": 0}})
+                response = jsonify({
+                    "statusCode": 200,
+                    "message": "Please contact an admin",
+                })
+
+        return response
 
     def dump(self, data):
         return AdminSchema(exclude=['_id']).dump(data).data
-
-
