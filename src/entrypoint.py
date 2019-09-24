@@ -82,6 +82,10 @@ def main():
         if element[0] == 'startfile':
             startfile = element[1]
             continue
+        if element[0] == 'port':
+            if element[1] is None:
+                config += '{}="{}", '.format(tags[element[0]], os.environ['PORT'])
+            continue
 
         if element[1] is not None:
             if element[0] == 'debug':
