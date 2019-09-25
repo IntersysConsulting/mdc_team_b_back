@@ -1,0 +1,17 @@
+# server: holds the configuration for the flask server
+# host: expects the host ip address
+# port: expects the host port number, if no port is specified it will use the  PORT environment variable
+# debug: debug information for the server interface
+# dotenv: Load the nearest .env and .flaskenv files to set environment variables. Will also change the working directory to the directory containing the first file found.
+# ssl-context: Context configuration for Flask server. Use "" for contex
+
+id: test
+version: "1.2.3"
+
+server:
+  startfile: "flaskr/app/run.py"
+  host: "0.0.0.0"
+  port: 5000
+  debug: y
+  dotenv:
+  sslcontext: 

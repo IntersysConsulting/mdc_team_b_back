@@ -2,6 +2,10 @@ import argparse
 import os
 import re
 import subprocess
+import sys
+
+import yaml
+
 
 '''
 This works as an wrapper for starting the flask server. It uses the 
@@ -9,109 +13,105 @@ Unix like command-line options, use --help to see what it can do.
 '''
 
 
-def str2bool(arg):
-    '''
-    function(arg) -> bool
-    This functions is a helper for argument parsing, return a bool
-    if the paremeter is yes, y, true, t, or 1.
-    '''
-    if isinstance(arg, bool):
-        return arg
-    elif arg.lower() in ('yes', 'y', 'true', 't', '1'):
-        return True
-    elif arg.lower() in ('no', 'n', 'false', '0'):
-        return False
+def extract_yaml_config(path):
+    config = None
+    with open(path) as filed:
+        try:
+            config = yaml.safe_load(filed)
+        except yaml.YAMLError as err:
+            print(err)
+            sys.exit(-1)
+    return config
 
-def replace_run(options):
-    with open('flaskr/app/run.py') as read:
-        with open('flaskr/app/tmp', 'w') as write:
-            for line in read:
-                if re.search('app.run', line):
-                    tmp = ''
-                    written = False
-                    for char in line:
-                        if written:
-                            tmp += ')'
-                            line = tmp
-                            break
-                        if char is '(':
-                            tmp += '('
-                            tmp += options
-                            written = True
-                        else:
-                            tmp += char
-                write.write(line)
-    os.remove('flaskr/app/run.py')
-    os.rename('flaskr/app/tmp', 'flaskr/app/run.py')
+
+def replace_run(args, filed):
+    with open(filed, 'r') as read:
+        text = read.readlines()
+    with open(filed, 'w') as write:
+        for line in text:
+            if re.search('app.run', line):
+                tmp = ''
+                written = False
+                for char in line:
+                    if written:
+                        tmp += ')'
+                        line = tmp
+                        break
+                    if char is '(':
+                        tmp += '('
+                        tmp += args
+                        written = True
+                    else:
+                        tmp += char
+            write.write(line)
+
 
 def main():
-    '''
-    Wrapper's main function
-    '''
-
     parser = argparse.ArgumentParser(
-        description='Wrapper for flask server on Heroku, WARNING: PAST run.py CONFIGURATION WILL BE ERASED')
+        description=
+        'Configuration script intent to work for flask. It uses a YAML as configuration file'
+    )
+    parser.add_argument('--modify',
+                        action='store_true',
+                        help='Enable the start server file')
     parser.add_argument(
-        '--host',
-        default='127.0.0.1',
+        '--file',
+        default='config.yaml',
         help=
-        '''The hostname to listen on. Set this to "0.0.0.0" to have the server available externally as well. Use "" for host'''
+        'With --modify option it will specify the file to modify. Default is config.yaml'
     )
     parser.add_argument(
-        '--port',
-        help=
-        '''The port of the webserver. Defaults to 5000 or the port defined in the SERVER_NAME config variable if present. Use "" for port'''
-    )
-    parser.add_argument('--debug',
-                        type=str2bool,
-                        default=True,
-                        help='If given, enable or disable debug mode.')
-    parser.add_argument(
-        '--load_dotenv',
-        help=
-        '''Load the nearest .env and .flaskenv files to set environment variables. Will also change the working directory to the directory containing the first file found.'''
-    )
-    parser.add_argument(
-        '--options',
-        nargs='*',
-        help='''The options to be forwarded to the underlying Werkzeug server.
-                        See werkzeug.serving.run_simple() for more information.'''
-    )
-
-    parser.add_argument(
-        '--ssl-context',
-        help='Context configuration for Flask server. Use "" for context'
-    )
-
-    parser.add_argument(
-        '--development',
-        type=str2bool,
-        default=False,
-        help=
-        '''Create a environment variable for port in case of local development that want to match with heroku's way to configure the server'''
-    )
+        '--execute',
+        action='store_true',
+        help='Start the server. Takes the file from the run.py')
 
     argp = parser.parse_args()
+    parsed = extract_yaml_config(argp.file)
 
-    if argp.development:
-        os.environ['PORT'] = '5000'
-    del argp.development
+    tags = {
+        'host': 'host',
+        'port': 'port',
+        'debug': 'debug',
+        'dotenv': 'load_dotenv',
+        'sslcontext': 'ssl_context'
+    }
 
-    if argp.port is None:
-        argp.port = os.environ['PORT']
+    config = ''
+    startfile = ''
+    for element in parsed['server'].items():
+        if element[0] == 'startfile':
+            startfile = element[1]
+            continue
+        if element[0] == 'port':
+            if element[1] is None:
+                config += '{}="{}", '.format(tags[element[0]], os.environ['PORT'])
+            continue
 
-    options = ''
-    for arg in vars(argp):
-        if getattr(argp, arg) is not None:
-            if arg == 'host' or arg == 'port' or arg == 'ssl_context':
-                options += '{}="{}", '.format(arg, getattr(argp, arg))
+        if element[1] is not None:
+            if element[0] == 'debug':
+                if element[1].lower() == 'y' or element[0].lower() == 'yes':
+                    config += '{}={}, '.format(tags[element[0]], 'True')
+                    continue
+                else:
+                    config += '{}={}, '.format(tags[element[0]], 'False')
+                    continue
+
+            if element[0] == 'host' or element[0] == 'load_dotenv' or element[
+                    0] == 'ssl_context':
+                if element[1] is None:
+                    continue
+                config += '{}="{}", '.format(tags[element[0]], element[1])
             else:
-                options += '{}={}, '.format(arg, getattr(argp, arg))
-    options = options[:-2]
-    replace_run(options)
+                config += '{}={}, '.format(tags[element[0]], element[1])
+    config = config[:-2]
 
-    with subprocess.Popen(['python', 'flaskr/app/run.py'], stdout=subprocess.PIPE) as process:
-        process.communicate()
+    if argp.modify:
+        replace_run(config, startfile)
+
+    if argp.execute:
+        with subprocess.Popen(['python', startfile]) as process:
+            process.communicate()
+
 
 if __name__ == "__main__":
     main()
