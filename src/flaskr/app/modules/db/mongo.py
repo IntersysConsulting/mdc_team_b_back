@@ -50,7 +50,9 @@ class Mongo:
         return self.db[collection].find_one(selector)
 
     def create(self, collection, user):
-        return self.db[collection].insert_one(user)
+        result = self.db[collection].insert_one(user)
+        # If succesful this should return 1
+        return result.modified_count
 
     def update(self, collection, selector, user):
         return self.db[collection].replace_one(selector, user).modified_count
