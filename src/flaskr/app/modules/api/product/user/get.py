@@ -29,16 +29,11 @@ def Get(args):
     page = 0 if not args['page'] else args['page']
     up = UserProduct()
 
-    x = up.GetProducts(filter, sort)
-    print(x)
+    productList = up.GetProducts(filter, sort)
 
     response = jsonify({
         "statusCode": 200,
         "message": "Success",
-        "data": {
-            "sort": sort,
-            "filter": filter,
-            "page": page
-        }
+        "data": productList
     })
     return response
