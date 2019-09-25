@@ -1,6 +1,7 @@
 from flask import jsonify
 from flask_restplus.namespace import RequestParser
 from werkzeug.datastructures import FileStorage
+from ....resources.product import AdminProduct
 
 #################
 # Parser        #
@@ -23,6 +24,10 @@ Parser.add_argument('picture',
                     type=FileStorage,
                     location='files',
                     required=True)
+Parser.add_argument('digital',
+                    help="Whether the product is a digital product or not",
+                    type=bool,
+                    location='form')
 Parser.add_argument('description',
                     help='Description of the product to be added',
                     required=False,
@@ -38,6 +43,7 @@ def Post(args):
     name = args['name']
     price = args['price']
     picture = args['picture']
+    digital = args['digital']
     # Manage optional fields like this. This is an inline optional assignation
     #              True value            IF    condition    ELSE       False value
     description = 'No description' if not args['description'] else args[
@@ -45,14 +51,21 @@ def Post(args):
 
     picture.save(picture.filename)
 
-    response = jsonify({
-        "statusCode": 200,
-        "message": "Successfully created a product",
-        "data": {
-            "name": name,
-            "price": price,
-            "picture": picture.filename,
-            "description": description
-        }
-    })
+    ap = AdminProduct()
+    elements, id = ap.create_product(name,
+                                     price,
+                                     picture.filename,
+                                     digital,
+                                     description=description)
+
+    if (elements > 0):
+        response = jsonify({
+            "statusCode": 200,
+            "message": "Successfully created a product",
+        })
+    else:
+        response = jsonify({
+            "statusCode": 400,
+            "message": "There was an error creating a product",
+        })
     return response
