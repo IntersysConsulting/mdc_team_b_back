@@ -12,4 +12,7 @@ class RevokedTokenModel():
 
     def is_jti_blacklisted(jti):
         query = Database.find(self.collection_name, jti)
-        return bool(query)
+        if query:
+            return "successful"
+        else:
+            return "unsuccessful"

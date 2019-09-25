@@ -12,7 +12,7 @@ class PasswordManagement:
     def __init__(self):
         self.todo = "Handle additional methods used for administration of passwords"
 
-    def generate_password(self, password):
+    def hash_password(self, password):
         return sha256.hash(password)
 
     def verify_hash(self, password, hash):
@@ -47,10 +47,10 @@ class AdminManagement:
             "password": "",
             "reset_token": {
                 "codeAccess": access,
-                "tries": 0,
+                "attempts": 0,
             },
             "last_login": '',
-            "enable": 1
+            "enable": true
         } ))
         return self.dump(admin)
 
@@ -78,7 +78,7 @@ class AdminManagement:
     def create_password(self,code, password, email):
         user = self.db.find(self.collection_name, {"email": email})
         response = jsonify({"": ""})
-        if user and user['enable'] == 1:
+        if user and user['enable']:
             if user['reset_token']['codeAccess'] == int(code):
                 updated = self.db.update(self.collection_name, {'_id': user['_id']}, { "$set":{"password": password} })
                 access_token = create_access_token(identity=user['email'])
@@ -89,14 +89,15 @@ class AdminManagement:
                     "access_token": access_token,
                     "refresh_token": refresh_token
                 })
-            elif user['reset_token']['tries'] < 2:
-                self.db.update(self.collection_name, {'_id': user['_id']}, { "$set":{"reset_token.tries": ttry}})
+            elif user['reset_token']['attempts'] < 2:
+                attempts = user['reset_token']['attempts'] + 1
+                self.db.update(self.collection_name, {'_id': user['_id']}, { "$set":{"reset_token.attempts": attempts}})
                 response = jsonify({
                     "statusCode": 200,
                     "message": "Your code access isn't valid, please make another attempt",
                 })
             else:
-                self.db.update(self.collection_name, {'_id': user['_id']}, { "$set":{"enable": 0}})
+                self.db.update(self.collection_name, {'_id': user['_id']}, { "$set":{"enable": false}})
                 response = jsonify({
                     "statusCode": 200,
                     "message": "Please contact an admin",

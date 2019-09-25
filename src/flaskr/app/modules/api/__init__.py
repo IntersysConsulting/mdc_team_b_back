@@ -1,4 +1,4 @@
-from flask import Blueprint, make_response, request, current_app
+from flask import Blueprint
 from flask_restplus import Api, Namespace, Resource
 from flask_cors import CORS
 # When you finish your class, add it under this one.

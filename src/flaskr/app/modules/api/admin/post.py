@@ -66,12 +66,13 @@ def Post(args):
                 "password": "",
                 "reset_token": {
                     'codeAccess': access,
-                    "tries": 0,
+                    "attempts": 0,
                 },
                 "last_login": ''
             }
         })
     except Exception:
         return jsonify({
-            'message': Exception
+            "statusCode": 500,
+            'message': "Internal server error"
         })
