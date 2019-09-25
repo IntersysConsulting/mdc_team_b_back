@@ -32,15 +32,19 @@ class Mongo:
                 _next_page * _page_size).limit(_page_size):
             allDocuments.append(document)
 
-        return allDocuments
+        # I commented this which is the right way to do it because I had to debug, but it technically should work if you use it... not tested.
+
         # if (sort != None):
         #     # If it requires sorting
         #     sortType = ASCENDING if _ascending else DESCENDING
         #     return self.db[collection].find(selector).sort(
         #         sort, sortType).skip(_next_page * _page_size).limit(_page_size)
         # # If it is unsorted
-        # return self.db[collection].find(selector).skip(
-        #     _next_page * _page_size).limit(_page_size)
+        # for document in self.db[collection].find(selector).skip(
+        #     _next_page * _page_size).limit(_page_size):
+        #    allDocuments.append(document)
+
+        return allDocuments
 
     def find(self, collection, selector):
         return self.db[collection].find_one(selector)

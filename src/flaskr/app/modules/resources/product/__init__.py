@@ -1,6 +1,7 @@
 from flask import jsonify
 from flask_restplus import Resource
 from ...db import Database
+from .schema import ProductSchema
 
 # In this file we implement methods that serve as a middle point between the exposed endpoint and the
 # actual middleware.
@@ -21,12 +22,17 @@ class UserProduct():
         print("Trying to get all products with {} as filter and {} as sort".
               format(filter, sort))
         db = Database()
+        output = []
         products = db.find_all(self.collection_name,
                                {'name': {
                                    '$regex': r'[a-zA-Z]*'
                                }}, sort, ascending, page)
+        for product in products:
+            output.append(self.dump(product))
+        return 1
 
-        return
+    def dump(self, data):
+        return ProductSchema(exclude=['_id']).dump(data).data
 
 
 class AdminProduct(UserProduct):
