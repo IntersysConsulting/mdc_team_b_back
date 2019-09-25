@@ -11,6 +11,7 @@ from .schema import ProductSchema
 class UserProduct():
     def __init__(self):
         self.collection_name = "products"
+        self.db = Database()
 
     def GetOne(self):
         pass
@@ -21,12 +22,11 @@ class UserProduct():
     def GetProducts(self, filter, sort, ascending=True, page=0):
         print("Trying to get all products with {} as filter and {} as sort".
               format(filter, sort))
-        db = Database()
         output = []
-        products = db.find_all(self.collection_name,
-                               {'name': {
-                                   '$regex': r'[a-zA-Z]*'
-                               }}, sort, ascending, page)
+        products = self.db.find_all(self.collection_name,
+                                    {'name': {
+                                        '$regex': r'[a-zA-Z]*'
+                                    }}, sort, ascending, page)
         for product in products:
             output.append(self.dump(product))
         return 1
@@ -40,6 +40,8 @@ class AdminProduct(UserProduct):
         self.todo = "Implement this class with actions only an admin can do"
 
     def create_product(self, name, price, image, digital, comment=""):
+        self.db.create(self.collection_name, {})
+
         pass
 
     def delete_product(self, id):
