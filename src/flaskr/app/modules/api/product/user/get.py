@@ -25,6 +25,7 @@ Parser.add_argument('page',
 
 def Get(args):
     filter = " " if not args['filter'] else args['filter']
+    # int x = isTrue?5:2
     sort = 0 if not args['sort'] else args['sort']
     page = 0 if not args['page'] else args['page']
     up = UserProduct()
@@ -34,6 +35,7 @@ def Get(args):
     response = jsonify({
         "statusCode": 200,
         "message": "Success",
+        "bears": True,
         "data": productList
     })
     return response

@@ -7,10 +7,6 @@ from ...resources.customer import CustomerManager
 #################
 Parser = RequestParser()
 
-Parser.add_argument('Authorization',
-                    help='Token the guest had before making their account.',
-                    required=True,
-                    location='headers')
 Parser.add_argument('first_name',
                     help='Customer first name',
                     required=True,
@@ -37,21 +33,38 @@ Parser.add_argument('phone',
 #################
 
 
-def Post(args):
+def Post(args, _id):
     first_name = args['first_name']
     last_name = args['last_name']
     email = args['email']
     password = args['password']
     phone = 0 if not args['phone'] else args['phone']
 
-    cart = 1  #This should ask the resource to make a cart, then assign the cart's ID to this field
-
     cm = CustomerManager()
 
-    cm.add(first_name, last_name, email, password, phone)
+    result = cm.add(_id, first_name, last_name, email, password, phone)
 
-    response = jsonify({
-        "statusCode": 200,
-        "message": "Successfully created customer account",
-    })
+    if result == 1:
+
+        response = jsonify({
+            "statusCode": 200,
+            "message": "Successfully created customer account",
+        })
+    elif result == -1:
+        response = jsonify({
+            "statusCode":
+            400,
+            "message":
+            "Email is already under use in the database",
+        })
+    elif result == -1:
+        response = jsonify({
+            "statusCode": 400,
+            "message": "User is already registered",
+        })
+    else:
+        response = jsonify({
+            "statusCode": 400,
+            "message": "Could not create the requested account",
+        })
     return response

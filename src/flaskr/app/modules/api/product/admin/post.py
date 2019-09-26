@@ -7,10 +7,6 @@ from ....resources.product import AdminProduct
 # Parser        #
 #################
 Parser = RequestParser()
-Parser.add_argument('Authorization',
-                    help="Admin's token",
-                    required=True,
-                    location="headers")
 Parser.add_argument('name',
                     help='Name of the product to be added',
                     required=True,
@@ -52,13 +48,13 @@ def Post(args):
     picture.save(picture.filename)
 
     ap = AdminProduct()
-    elements, id = ap.create_product(name,
-                                     price,
-                                     picture.filename,
-                                     digital,
-                                     description=description)
+    success = ap.create_product(name,
+                                price,
+                                picture.filename,
+                                digital,
+                                description=description).acknowledged
 
-    if (elements > 0):
+    if (success):
         response = jsonify({
             "statusCode": 200,
             "message": "Successfully created a product",

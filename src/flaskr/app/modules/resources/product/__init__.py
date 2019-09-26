@@ -13,7 +13,6 @@ class UserProduct():
         self.collection_name = "products"
         self.db = Database()
 
-    These are unnecessary
     def GetOne(self, id):
         return self.db.find(self.collection_name,{"_id": ObjectId(id)})        
 
@@ -36,7 +35,7 @@ class UserProduct():
         return ProductSchema().dump(data).data
 
 
-class AdminProduct(UserProduct):
+class AdminProduct():
     def __init__(self):
         self.collection_name = "products"
         self.db = Database()

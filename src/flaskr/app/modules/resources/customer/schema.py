@@ -25,6 +25,7 @@ class BillingAddressSchema(Schema):
 
 
 class CustomerSchema(Schema):
+    _id = fields.String()
     first_name = fields.String()
     last_name = fields.String()
     email = fields.Email()
