@@ -1,5 +1,6 @@
 from flask import jsonify
 from flask_restplus.namespace import RequestParser
+from ...resources.customer import CustomerManager
 
 #################
 # Parser        #
@@ -39,8 +40,7 @@ def Put(args):
     phone = 0 if not args['phone'] else args['phone']
     # This endpoint was reached thanks to them accepting the TOS, so the timestamp should just be now.
     # We should not let anyone send a timestamp as this could lead to fake timestamps.
-    ToS = datetime.now().strftime(
-        "%d-%b-%Y (%H:%M:%S.%f)")  #An indicative that the ToS were accepted
+    
 
     response = jsonify({
         "statusCode": 200,

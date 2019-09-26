@@ -1,9 +1,10 @@
 from flask import jsonify
 from flask_restplus import Resource
-from ....resources.admin  import AdminManagement
+from ....resources.admin import AdminManagement
 from flask_restplus.namespace import RequestParser
 from flask_jwt_extended import (create_access_token, create_refresh_token,
-                                jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
+                                jwt_required, jwt_refresh_token_required,
+                                get_jwt_identity, get_raw_jwt)
 
 #################
 # Parser        #
@@ -27,22 +28,22 @@ def Post(args):
     password = args['password']
 
     am = AdminManagement()
-    if am.login_admin(email, password):
-        access_token = create_access_token(identity=email)
-        refresh_token = create_refresh_token(identity=email)
+    result, _id = am.login_admin(email, password)
+
+    if result == 1:
+        access_token = create_access_token(identity=_id)
+        refresh_token = create_refresh_token(identity=_id)
 
         response = jsonify({
             "statusCode": 200,
-            "message": "Successfully logged in",
+            "message": "Welcome admin",
             "access_token": access_token,
             "refresh_token": refresh_token,
         })
-
+    elif result == 0:
+        response = jsonify({"statusCode": 400, "message": "Wrong password"})
+    elif result == -1:
+        response = jsonify({"statusCode": 400, "message": "Wrong email"})
+    else:
+        response = jsonify({"statusCode": 400, "message": "Unexpected error"})
         return response
-
-class TokenRefresh(Resource):
-    @jwt_refresh_token_required
-    def getNewToken(self):
-        current_user = get_jwt_identity()
-        access_token = create_access_token(identity = current_user)
-        return {'access_token': access_token}

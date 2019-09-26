@@ -1,6 +1,6 @@
 from flask import jsonify
 from flask_restplus import Resource, fields, Namespace
-from ...resources.customer import Customer
+from ...resources.customer import CustomerManager
 # FileStorage allows us to import files from http requests.
 from werkzeug.datastructures import FileStorage
 from datetime import datetime
@@ -14,10 +14,9 @@ from .billing.delete import Delete as BillingDelete, Parser as delete_billing_pa
 from .shipping.post import Post as ShippingPost, Parser as add_shipping_parser
 from .shipping.put import Put as ShippingPut, Parser as update_shipping_parser
 from .shipping.delete import Delete as ShippingDelete, Parser as delete_shipping_parser
+from flask_jwt_extended import (create_access_token, create_refresh_token,
+                                get_jwt_identity, jwt_required)
 
-guest_ns = Namespace(
-    "customers/guest",
-    description="Endpoints that allow users to work with guest accounts")
 customer_ns = Namespace(
     "customers",
     description="Endpoints that interact with guest and customer accounts")
@@ -27,7 +26,7 @@ customer_ns = Namespace(
 #########################################################
 
 
-@guest_ns.route("/")
+@customer_ns.route("/guest")
 class GuestOptions(Resource):
     def post(self):
         '''
@@ -45,6 +44,7 @@ class GuestOptions(Resource):
 class CustomerOptions(Resource):
     @customer_ns.response(200, 'Account succesfully created')
     @customer_ns.expect(add_account_parser)
+    @jwt_required
     def post(self):
         '''
         Creates a new account. 
@@ -52,8 +52,10 @@ class CustomerOptions(Resource):
         This allows us to retain shipping and billing addresses that were previously assigned, and to retain the user's cart after they sign up.
         In reality it should only respond with the Authorization token
         '''
+        value = get_jwt_identity()
+        print("What I knopw of this token is {}".format(value))
         args = add_account_parser.parse_args()
-        return Post(args)
+        return Post(args, value)
 
     @customer_ns.expect(get_account_parser)
     def get(self):

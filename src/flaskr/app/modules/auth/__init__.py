@@ -6,6 +6,6 @@ authorizations = {
     'jwt': {
         'type': 'apiKey',
         'in': 'header',
-        'name': 'authorization'
+        'name': 'Authorization'
     }
 }

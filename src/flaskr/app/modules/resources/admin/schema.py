@@ -3,6 +3,7 @@ from ..reset_token.schema import ResetTokenSchema
 
 
 class AdminSchema(Schema):
+    _id = fields.String()
     email = fields.Email(required=True)
     first_name = fields.String(required=True)
     last_name = fields.String(required=True)

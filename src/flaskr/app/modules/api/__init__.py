@@ -5,7 +5,7 @@ from flask_cors import CORS
 from .product import any_ns as product_any, admin_ns as product_admin
 from .order import user_ns as order_user, admin_ns as order_admin
 from .cart import any_ns as cart_any
-from .customer import guest_ns as customer_guest, customer_ns as customer_user
+from .customer import customer_ns as customer_user
 from .admin import admin_ns as management_admin
 from .session import customer_ns as session_customer, admin_ns as session_admin
 from ..auth import authorizations
@@ -30,7 +30,6 @@ api = Api(v1_blueprint,
 ###################################
 api.add_namespace(cart_any)
 api.add_namespace(customer_user)
-api.add_namespace(customer_guest)
 api.add_namespace(order_user)
 api.add_namespace(product_any)
 api.add_namespace(session_customer)

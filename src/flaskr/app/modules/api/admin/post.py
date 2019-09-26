@@ -1,9 +1,10 @@
 from flask import jsonify, render_template, Flask
 from flask_mail import Message, Mail
 from flask_restplus.namespace import RequestParser
-from ...resources.admin  import AdminManagement
+from ...resources.admin import AdminManagement
 from flask_jwt_extended import (create_access_token, create_refresh_token,
-                                jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
+                                jwt_required, jwt_refresh_token_required,
+                                get_jwt_identity, get_raw_jwt)
 
 import random
 
@@ -40,9 +41,7 @@ def Post(args):
 
     am = AdminManagement()
     if am.find_admin(email):
-        return jsonify({
-            'message': 'User {} already exists'.format(email)
-        })
+        return jsonify({'message': 'User {} already exists'.format(email)})
 
     try:
         access = random.randint(1000, 10000)
@@ -50,9 +49,16 @@ def Post(args):
 
         msg = Message("Welcome",
                       sender='itersysecommerce@gmail.com',
-                      recipients=['banda1915@gmail.com'])
+                      recipients=['rfigueroa@intersysconsulting.com'
+                                  ])  # Should be changed to customer's email
         with app.open_resource("../../../templates/logo.jpg") as fp:
-            msg.attach('logo.jpg','image/jpg', fp.read(), 'inline', headers=[['Content-ID','<Myimage>'],])
+            msg.attach('logo.jpg',
+                       'image/jpg',
+                       fp.read(),
+                       'inline',
+                       headers=[
+                           ['Content-ID', '<Myimage>'],
+                       ])
         msg.html = render_template('email.html', code=access, email=email)
         mail = Mail()
         mail.send(msg)
@@ -72,7 +78,4 @@ def Post(args):
             }
         })
     except Exception:
-        return jsonify({
-            "statusCode": 500,
-            'message': "Internal server error"
-        })
+        return jsonify({"statusCode": 500, 'message': "Internal server error"})

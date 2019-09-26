@@ -1,17 +1,20 @@
 from flask import jsonify
 from flask_restplus.namespace import RequestParser
-
+from ....resources.customer import CustomerManager
+from flask_jwt_extended import (create_access_token, create_refresh_token,
+                                jwt_required, jwt_refresh_token_required,
+                                get_jwt_identity, get_raw_jwt)
 #################
 # Parser        #
 #################
 Parser = RequestParser()
 Parser.add_argument("email",
                     help="Customer's e-mail tied to their account.",
-                    required=True,
+                    required=False,
                     location="form")
 Parser.add_argument("password",
                     help="Customer's password.",
-                    required=True,
+                    required=False,
                     location="form")
 #################
 # Method        #
@@ -21,12 +24,26 @@ Parser.add_argument("password",
 def Post(args):
     email = args['email']
     password = args['password']
-    token = "This_would_be_a_JWT_token_for_the_user"
-    response = jsonify({
-        "statusCode": 200,
-        "message": "Successfully logged in",
-        "data": {
-            "token": token
-        }
-    })
+
+    print("The user {} is trying to log in.".format(email))
+    cm = CustomerManager()
+
+    result, _id = cm.login(email, password)
+
+    if result == 1:
+        access_token = create_access_token(identity=_id)
+        refresh_token = create_refresh_token(identity=_id)
+
+        response = jsonify({
+            "statusCode": 200,
+            "message": "Welcome customer",
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+        })
+    elif result == 0:
+        response = jsonify({"statusCode": 400, "message": "Wrong password"})
+    elif result == -1:
+        response = jsonify({"statusCode": 400, "message": "Wrong email"})
+    else:
+        response = jsonify({"statusCode": 400, "message": "Unexpected error"})
     return response
