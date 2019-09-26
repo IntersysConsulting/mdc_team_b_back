@@ -1,5 +1,7 @@
-from flask import jsonify
-from flask_restplus.namespace import RequestParser
+from flask import jsonify, request, make_response
+from flask_restplus.namespace import RequestParser, request
+from ...resources.admin  import AdminManagement
+from flask_jwt_extended import (create_access_token, create_refresh_token)
 
 #################
 # Parser        #
@@ -9,6 +11,10 @@ Parser.add_argument('Authorization',
                     help="Admin's session token",
                     required=True)
 Parser.add_argument('current_password',
+                    help='Current password of admin',
+                    required=True,
+                    location='form')
+Parser.add_argument('password',
                     help='Current password of admin',
                     required=True,
                     location='form')
@@ -29,21 +35,10 @@ Parser.add_argument('new_password',
 # Method        #
 #################
 
-
 def Put(args):
-    current_password = args['current_password']
-    first_name = args['first_name']
-    last_name = args['last_name']
-    new_password = '' if not args['new_password'] else args['new_password']
+    am = AdminManagement()
+    response = jsonify({"": ""})
+    if args['code'] and args['email']:
+        response = am.create_password(args['code'], args['password'], args['email'])
 
-    response = jsonify({
-        "statusCode": 200,
-        "message": "Successfully updated admin",
-        "data": {
-            "current_password": current_password,
-            "first_name": first_name,
-            "last_name": last_name,
-            "new_password": new_password
-        }
-    })
     return response

@@ -8,7 +8,7 @@ class Database(object):
         
     def find_all(self, table, selector, sort, asc=True, next_page=0, page_size = _Page_Size):
         return self.client.find_all(table, selector, sort, asc, next_page, page_size)
-    def find  (self, table, selector):
+    def find(self, table, selector):
         return self.client.find(table, selector)
     
     def create(self, table, element):

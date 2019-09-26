@@ -1,5 +1,13 @@
-from flask import jsonify
+from flask import jsonify, render_template, Flask
+from flask_mail import Message, Mail
 from flask_restplus.namespace import RequestParser
+from ...resources.admin  import AdminManagement
+from flask_jwt_extended import (create_access_token, create_refresh_token,
+                                jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
+
+import random
+
+app = Flask(__name__)
 
 #################
 # Parser        #
@@ -30,13 +38,41 @@ def Post(args):
     last_name = args['last_name']
     email = args['email']
 
-    response = jsonify({
-        "statusCode": 200,
-        "message": "Successfully created new admin",
-        "data": {
-            "first_name": first_name,
-            "last_name": last_name,
-            "email": email
-        }
-    })
-    return response
+    am = AdminManagement()
+    if am.find_admin(email):
+        return jsonify({
+            'message': 'User {} already exists'.format(email)
+        })
+
+    try:
+        access = random.randint(1000, 10000)
+        am.create_admin(first_name, last_name, email, access)
+
+        msg = Message("Welcome",
+                      sender='itersysecommerce@gmail.com',
+                      recipients=['banda1915@gmail.com'])
+        with app.open_resource("../../../templates/logo.jpg") as fp:
+            msg.attach('logo.jpg','image/jpg', fp.read(), 'inline', headers=[['Content-ID','<Myimage>'],])
+        msg.html = render_template('email.html', code=access, email=email)
+        mail = Mail()
+        mail.send(msg)
+
+        return jsonify({
+            "statusCode": 200,
+            "message": "Successfully created new admin",
+            "data": {
+                "first_name": first_name,
+                "last_name": last_name,
+                "password": "",
+                "reset_token": {
+                    'codeAccess': access,
+                    "attempts": 0,
+                },
+                "last_login": ''
+            }
+        })
+    except Exception:
+        return jsonify({
+            "statusCode": 500,
+            'message': "Internal server error"
+        })

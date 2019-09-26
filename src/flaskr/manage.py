@@ -25,7 +25,7 @@ def run_tests():
 @manager.command
 def debug_fix():
     """
-    I have trouble with hitting breakpoints in lask-RESTful class methods.
+    I have trouble with hitting breakpoints in flask-RESTful class methods.
     This method help me.
     """
     app.config['DEBUG'] = False
