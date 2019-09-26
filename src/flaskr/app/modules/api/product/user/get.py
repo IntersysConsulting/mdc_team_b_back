@@ -35,7 +35,6 @@ def Get(args):
     response = jsonify({
         "statusCode": 200,
         "message": "Success",
-        "bears": True,
         "data": productList
     })
     return response
