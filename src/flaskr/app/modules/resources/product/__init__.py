@@ -13,9 +13,9 @@ class UserProduct():
         self.collection_name = "products"
         self.db = Database()
 
-    # These are unnecessary
-    # def GetOne(self, id):
-    #     pass
+    These are unnecessary
+    def GetOne(self, id):
+        return self.db.find(self.collection_name,{"_id": ObjectId(id)})        
 
     # def GetAll(self):
     #     pass

@@ -2,30 +2,17 @@ from flask import jsonify
 from flask_restplus import Resource
 from ...db import Database
 from .schema import AdminSchema
-from passlib.hash import pbkdf2_sha256 as sha256
+from ..password_management import hash_password, verify_hash
 from flask_jwt_extended import (create_access_token, create_refresh_token)
-
-# This section is a draft for ideas, will be formally worked on later on.
-
-
-class PasswordManagement:
-    def __init__(self):
-        self.todo = "Handle additional methods used for administration of passwords"
-
-    def hash_password(self, password):
-        return sha256.hash(password)
-
-    def verify_hash(self, password, hash):
-        return sha256.verify(password, hash)
-
 
 class AdminManagement:
     def __init__(self):
-        self.todo = ""
         self.collection_name = "admins"
         self.db = Database()
 
     def login_admin(self, email, password):
+
+        
         admin = self.db.find(self.collection_name, {
             "email": email,
             "password": password

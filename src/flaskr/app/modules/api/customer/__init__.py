@@ -1,6 +1,6 @@
 from flask import jsonify
 from flask_restplus import Resource, fields, Namespace
-from ...resources.customer import Customer
+from ...resources.customer import CustomerManager
 # FileStorage allows us to import files from http requests.
 from werkzeug.datastructures import FileStorage
 from datetime import datetime

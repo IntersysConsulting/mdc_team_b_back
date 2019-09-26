@@ -30,7 +30,7 @@ def Post(args):
     if am.login_admin(email, password):
         access_token = create_access_token(identity=email)
         refresh_token = create_refresh_token(identity=email)
-
+        
         response = jsonify({
             "statusCode": 200,
             "message": "Successfully logged in",

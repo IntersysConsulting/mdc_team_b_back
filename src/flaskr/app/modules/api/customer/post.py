@@ -1,5 +1,6 @@
 from flask import jsonify
 from flask_restplus.namespace import RequestParser
+from ...resources.customer import CustomerManager
 
 #################
 # Parser        #
@@ -42,21 +43,15 @@ def Post(args):
     email = args['email']
     password = args['password']
     phone = 0 if not args['phone'] else args['phone']
-    ToS = datetime.now()
-    timestamp = datetime.now()
+
     cart = 1  #This should ask the resource to make a cart, then assign the cart's ID to this field
+
+    cm = CustomerManager()
+
+    cm.add(first_name, last_name, email, password, phone)
+
     response = jsonify({
         "statusCode": 200,
-        "message":"Successfully created customer account",
-        "data": {
-            "first_name": first_name,
-            "last_name": last_name,
-            "email": email,
-            "password": password,
-            "phone": phone,
-            "ToS": ToS.strftime("%d-%b-%Y (%H:%M:%S.%f)"),
-            "timestamp": timestamp.strftime("%d-%b-%Y (%H:%M:%S.%f)"),
-            "cart": cart
-        }
+        "message": "Successfully created customer account",
     })
     return response
