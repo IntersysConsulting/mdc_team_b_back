@@ -37,8 +37,9 @@ class Mongo:
     def create(self, table, user):
         return self.db[table].insert_one(user)
         
-    def update(self, table, selector, user):
-        return self.db[table].replace_one(selector, user).modified_count
+    def update(self, table, selector, element):
+        # return self.db[table].replace_one(selector, user).modified_count
+        return self.db[table].update_one(selector, element).modified_count
 
     def delete(self, table, selector):
             return self.db[table].delete_one(selector).deleted_count

@@ -1,4 +1,5 @@
 from flask import jsonify
+from flask import Blueprint, request
 from flask_restplus import Resource, fields, Namespace
 from ...resources.admin import AdminManagement
 # from werkzeug.datastructures import FileStorage
@@ -7,12 +8,16 @@ from .post import Post, Parser as add_admin_parser
 from .put import Put, Parser as update_admin_parser
 from .delete import Delete, Parser as delete_admin_parser
 
+from ...auth import authorizations
+
 admin_ns = Namespace(
     "admin/management",
+    authorizations=authorizations,
     description="Endpoints that allows admins to manage the store's staff")
 
 
 @admin_ns.route("/")
+@admin_ns.doc(security="jwt")
 @admin_ns.response(403, "Forbidden - User is not an admin")
 class Admin(Resource):
     @admin_ns.expect(get_admin_parser)
@@ -38,8 +43,7 @@ class Admin(Resource):
         '''
         Updates the issuing admin's information
         '''
-        args = update_admin_parser.parse_args()
-        return Put(args)
+        return Put(request.json)
 
     @admin_ns.response(200, 'Admin was sucessfully deleted')
     @admin_ns.expect(delete_admin_parser)
