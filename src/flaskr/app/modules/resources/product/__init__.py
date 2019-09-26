@@ -1,9 +1,8 @@
 from flask import jsonify
-from flask_restplus import Resource
 from ...db import Database
 from .schema import ProductSchema
 from datetime import datetime
-
+from bson.objectid import ObjectId
 # In this file we implement methods that serve as a middle point between the exposed endpoint and the
 # actual middleware.
 # Validate operation logic here, not permission to access it.
@@ -14,11 +13,12 @@ class UserProduct():
         self.collection_name = "products"
         self.db = Database()
 
-    def GetOne(self):
-        pass
+    # These are unnecessary
+    # def GetOne(self, id):
+    #     pass
 
-    def GetAll(self):
-        pass
+    # def GetAll(self):
+    #     pass
 
     def GetProducts(self, filter, sort, ascending=True, page=0):
         print("Trying to get all products with {} as filter and {} as sort".
@@ -26,14 +26,14 @@ class UserProduct():
         output = []
         products = self.db.find_all(self.collection_name,
                                     {'name': {
-                                        '$regex': r'[a-zA-Z]*'
+                                        '$regex': r''
                                     }}, sort, ascending, page)
         for product in products:
             output.append(self.dump(product))
         return output
 
     def dump(self, data):
-        return ProductSchema(exclude=['_id']).dump(data).data
+        return ProductSchema().dump(data).data
 
 
 class AdminProduct(UserProduct):
@@ -59,7 +59,41 @@ class AdminProduct(UserProduct):
         return items
 
     def delete_product(self, id):
-        pass
+        print("Deleting the product {}".format(id))
+
+        found_an_item = self.db.find(self.collection_name,
+                                     {"_id": ObjectId(id)})
+        items = self.db.delete(self.collection_name, {"_id": ObjectId(id)})
+        print("Deleted {} coincidences".format(items))
+        response = items if found_an_item else -1
+        return response
 
     def update_product(self, id, name, price, img, digital, description=""):
-        pass
+        print("Updating {}.".format(id))
+        found_item = self.db.find(self.collection_name, {"_id": ObjectId(id)})
+
+        if found_item:
+            _name = found_item["name"] if name == None else name
+            _price = found_item["price"] if price == None else price
+            _img = found_item["img"] if img == None else img
+            _digital = found_item["digital"] if digital == None else digital
+            _description = found_item[
+                "description"] if description == None else description
+            now = datetime.now()
+
+            result = self.db.update(self.collection_name,
+                                    {"_id": ObjectId(id)}, {
+                                        "$set": {
+                                            "name": _name,
+                                            "price": _price,
+                                            "img": _img,
+                                            "digital": _digital,
+                                            "description": _description,
+                                            "modified_at": now
+                                        }
+                                    })
+
+        else:
+            result = -1
+
+        return result

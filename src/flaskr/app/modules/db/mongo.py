@@ -49,13 +49,14 @@ class Mongo:
     def find(self, collection, selector):
         return self.db[collection].find_one(selector)
 
-    def create(self, collection, user):
-        result = self.db[collection].insert_one(user)
+    def create(self, collection, new_item):
+        result = self.db[collection].insert_one(new_item)
         # If succesful this should return 1
         return result.modified_count
 
-    def update(self, collection, selector, user):
-        return self.db[collection].replace_one(selector, user).modified_count
+    def update(self, collection, selector, new_item):
+        return self.db[collection].update_one(selector,
+                                              new_item).modified_count
 
     def delete(self, collection, selector):
         return self.db[collection].delete_one(selector).deleted_count
