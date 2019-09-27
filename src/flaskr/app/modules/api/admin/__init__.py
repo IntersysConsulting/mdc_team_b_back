@@ -7,6 +7,8 @@ from .get import Get, Parser as get_admin_parser
 from .post import Post, Parser as add_admin_parser
 from .put import Put, Parser as update_admin_parser
 from .delete import Delete, Parser as delete_admin_parser
+from .reset.put import Put as ResetPut, Parser as reset_password_parser
+from .reset.post import Post as ResetPost, Parser as request_password_parser
 
 from ...auth import authorizations
 
@@ -54,3 +56,22 @@ class Admin(Resource):
         args = delete_admin_parser.parse_args()
 
         return Delete(args)
+
+
+@admin_ns.route("/reset")
+class PasswordReset(Resource):
+    @admin_ns.expect(request_password_parser)
+    def post(self):
+        '''
+        Requests a password reset for an admin
+        '''
+        args = request_password_parser.parse_args()
+        return ResetPost(args)
+
+    @admin_ns.expect(reset_password_parser)
+    def put(self):
+        '''
+        Allows an admin to reset their password if they requested it
+        '''
+        args = reset_password_parser.parse_args()
+        return ResetPut(args)

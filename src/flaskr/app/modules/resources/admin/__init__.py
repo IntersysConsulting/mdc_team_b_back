@@ -4,6 +4,8 @@ from ...db import Database
 from .schema import AdminSchema
 from ..password_management import hash_password, verify_hash
 from flask_jwt_extended import (create_access_token, create_refresh_token)
+from pymongo import errors
+import random
 
 
 class AdminManagement:
@@ -42,19 +44,30 @@ class AdminManagement:
     def get_all_admins(self):
         pass
 
-    def create_admin(self, first_name, last_name, email, access):
-        admin = self.db.create(self.collection_name, ({
-            "email": email,
-            "first_name": first_name,
-            "last_name": last_name,
-            "reset_token": {
-                "accessCode": access,
-                "attempts": 0,
-            },
-            "last_login": '',
-            "enabled": true
-        }))
-        return self.dump(admin)
+    def create_admin(self, first_name, last_name, email):
+        try:
+            admin = self.db.create(self.collection_name, ({
+                "email": email,
+                "first_name": first_name,
+                "last_name": last_name,
+                "enabled": True
+            }))
+
+            if admin != None:
+                # If the admin exists, it requests a code
+                res, code = self.request_reset(email)
+                if code != None:
+                    # If we were able to request resetting the password
+                    result = 1, code
+                else:
+                    # If we failed to request the password reset
+                    result = -2, None
+            else:
+                result = 0, None
+        except errors.DuplicateKeyError:
+            #There is an admin with that email already!
+            result = -1, None
+        return result
 
     def delete_admin(self, id, email=None):
         # If the parameter email field is not blank then it tries to delete by email. Otherwise it will look up by _id
@@ -77,45 +90,85 @@ class AdminManagement:
         email = {"first_name": email}
         updated = self.db.update(self.collection_name, email, new_password)
 
-    def create_password(self, code, password, email):
+    def request_reset(self, email):
         user = self.db.find(self.collection_name, {"email": email})
-        response = jsonify({"": ""})
-        if user and user['enabled']:
-            if user['reset_token']['accessCode'] == int(code):
-                updated = self.db.update(self.collection_name,
-                                         {'_id': user['_id']},
-                                         {"$set": {
-                                             "password": password
-                                         }})
-                access_token = create_access_token(identity=user['email'])
-                refresh_token = create_refresh_token(identity=user['email'])
-                response = jsonify({
-                    "statusCode": 200,
-                    "message": "Successfully created password admin",
-                    "access_token": access_token,
-                    "refresh_token": refresh_token
+        if user == None:
+            response = -1, None
+        elif user["enabled"] == False:
+            response = -2, None
+        elif "reset_token" in user.keys():
+            response = -3, None
+        else:
+            accessCode = random.randint(1000, 10000)
+
+            response = self.db.update(self.collection_name, {'email': email}, {
+                "$set": {
+                    "reset_token": {
+                        "access_code": hash_password(str(accessCode)),
+                        "attempts": 0
+                    }
+                }
+            }), accessCode
+
+        print("A token reset was asked by {} and I returned {}".format(
+            email, response))
+        return response
+
+    def reset_password(self, code, password, email):
+        user = self.db.find(self.collection_name, {"email": email})
+
+        if user == None:
+            # The user does not exist
+            response = -1, None
+        elif not 'reset_token' in user.keys():
+            # The user did not request to get their password changed
+            response = -2, None
+        elif user['enabled'] == False:
+            # The user's account has been disabled
+            response = -3, None
+        elif not verify_hash(code, user['reset_token']['access_code']):
+            # The user's reset token does not match
+            if user['reset_token']['attempts'] >= 2:
+                # The user has provided the wrong code too many times
+                self.db.update(self.collection_name, {'_id': user['_id']}, {
+                    "$set": {
+                        "enabled": False,
+                        "reset_token.attempts":
+                        user['reset_token']['attempts'] + 1
+                    }
                 })
-            elif user['reset_token']['attempts'] < 2:
-                attempts = user['reset_token']['attempts'] + 1
-                self.db.update(self.collection_name, {'_id': user['_id']},
-                               {"$set": {
-                                   "reset_token.attempts": attempts
-                               }})
-                response = jsonify({
-                    "statusCode":
-                    200,
-                    "message":
-                    "Your access code isn't valid, please make another attempt",
-                })
+                # The user's account has been disabled due to exceeding the maximum amount of requests
+                response = -3, None
             else:
-                self.db.update(self.collection_name, {'_id': user['_id']},
-                               {"$set": {
-                                   "enabled": false
-                               }})
-                response = jsonify({
-                    "statusCode": 200,
-                    "message": "Please contact an admin",
+                # The user provided a wrong token to reset their password an acceptable number of times
+                self.db.update(self.collection_name, {'_id': user['_id']}, {
+                    "$set": {
+                        "reset_token.attempts":
+                        user['reset_token']['attempts'] + 1
+                    }
                 })
+                # The user may continue to attempt resetting their password
+                response = 0, None
+        else:
+            # The user exists, wants their password changed, hasn't been disabled and submitted the correct access code
+            result = self.db.update(self.collection_name, {'_id': user['_id']},
+                                    {
+                                        "$set": {
+                                            "password": hash_password(password)
+                                        },
+                                        "$unset": {
+                                            "reset_token": ""
+                                        }
+                                    })
+            access_token = create_access_token(identity=user['email'])
+            refresh_token = create_refresh_token(identity=user['email'])
+            if result == 1:
+                # The user was successfully updated
+
+                response = 1, user['_id']
+            else:
+                # For some reason we could not update the server
+                response = -4, None
 
         return response
 
