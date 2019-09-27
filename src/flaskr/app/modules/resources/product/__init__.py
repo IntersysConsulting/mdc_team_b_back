@@ -19,14 +19,12 @@ class UserProduct():
     # def GetAll(self):
     #     pass
 
-    def GetProducts(self, filter, sort, ascending=True, page=0):
-        print("Trying to get all products with {} as filter and {} as sort".
-              format(filter, sort))
+    def GetProducts(self, filter, sort, ascending=True, page=0, page_size=None):
         output = []
         products = self.db.find_all(self.collection_name,
                                     {'name': {
                                         '$regex': r''
-                                    }}, sort, ascending, page)
+                                    }}, sort, ascending, page, page_size=page_size)
         for product in products:
             output.append(self.dump(product))
         return output

@@ -13,12 +13,14 @@ class Database(object):
                  sort,
                  asc=True,
                  next_page=0,
-                 page_size=_Page_Size):
-        print("Querying with table: {} selector: {} sort: {}".format(
-            table, selector, sort))
+                 page_size=None):
+        get_page_size = _Page_Size if page_size == None else page_size
+        print(
+            "Querying with table: {} selector: {} sort: {} page:{} page_size:{}"
+            .format(table, selector, sort, next_page, get_page_size))
         result = self.client.find_all(table, selector, sort, asc, next_page,
-                                      page_size)
-        print("The database returned {}".format(result))
+                                      get_page_size)
+        print("The database returned {} results".format(len(result)))
         return result
 
     def find(self, table, selector):
