@@ -21,13 +21,16 @@ class UserProduct():
 
     def GetProducts(self, filter, sort, ascending=True, page=0, page_size=None):
         output = []
+        selector = {'name': {'$regex': r''}}
+
+        total = self.db.get_count(self.collection_name, selector )
+        print("The total I got was {}".format(total))
         products = self.db.find_all(self.collection_name,
-                                    {'name': {
-                                        '$regex': r''
-                                    }}, sort, ascending, page, page_size=page_size)
+                                    selector, sort, ascending, page, page_size=page_size)
         for product in products:
             output.append(self.dump(product))
-        return output
+
+        return output, total
 
     def dump(self, data):
         return ProductSchema().dump(data).data

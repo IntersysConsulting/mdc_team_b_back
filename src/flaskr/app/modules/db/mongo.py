@@ -46,6 +46,9 @@ class Mongo:
 
         return allDocuments
 
+    def get_count(self, collection, selector):
+        return self.db[collection].find(selector).count()
+
     def find(self, collection, selector):
         return self.db[collection].find_one(selector)
 

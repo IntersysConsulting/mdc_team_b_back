@@ -34,12 +34,16 @@ def Get(args):
     page_size = None if not args['page_size'] else args['page_size']
     up = UserProduct()
 
-    productList = up.GetProducts(filter, sort, page=page, page_size=page_size)
+    productList, total = up.GetProducts(filter,
+                                        sort,
+                                        page=page,
+                                        page_size=page_size)
 
     response = jsonify({
         "statusCode": 200,
         "message": "Success",
         "data": productList,
-        "count": len(productList)
+        "count": len(productList),
+        "total": total
     })
     return response

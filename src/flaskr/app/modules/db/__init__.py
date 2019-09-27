@@ -23,6 +23,9 @@ class Database(object):
         print("The database returned {} results".format(len(result)))
         return result
 
+    def get_count(self, table, selector):
+        return self.client.get_count(table, selector)
+
     def find(self, table, selector):
         return self.client.find(table, selector)
 
