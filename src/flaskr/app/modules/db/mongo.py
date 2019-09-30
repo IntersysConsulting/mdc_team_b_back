@@ -46,6 +46,9 @@ class Mongo:
 
         return allDocuments
 
+    def get_count(self, collection, selector):
+        return self.db[collection].find(selector).count()
+
     def find(self, collection, selector):
         return self.db[collection].find_one(selector)
 
@@ -59,3 +62,6 @@ class Mongo:
 
     def delete(self, collection, selector):
         return self.db[collection].delete_one(selector).deleted_count
+
+    def aggregate(self, collection, query):
+        return self.db[collection].aggregate(query)

@@ -4,7 +4,7 @@ from ...resources.customer import CustomerManager
 # FileStorage allows us to import files from http requests.
 from werkzeug.datastructures import FileStorage
 from datetime import datetime
-from .get import Get, Parser as get_account_parser
+from .get import Get
 from .post import Post, Parser as add_account_parser
 from .put import Put as Put, Parser as update_account_parser
 from .guest.post import Post as GuestPost
@@ -57,26 +57,27 @@ class CustomerOptions(Resource):
         args = add_account_parser.parse_args()
         return Post(args, value)
 
-    @customer_ns.expect(get_account_parser)
+    @jwt_required
     def get(self):
         """
         Returns the customer's visible data.
         Visible Data: First name, Last name, E-Mail, Phone Number, and various addresses. 
         Excludes information like password, TOS timestamp, account creation timestamp and cart id since they're unnecessary for our customer. 
         """
-        args = get_account_parser.parse_args()
-
-        return Get(args)
+        identity = get_jwt_identity()
+        return Get(identity)
 
     @customer_ns.response(200, 'Successfully updated guest information')
     @customer_ns.expect(update_account_parser)
+    @jwt_required
     def put(self):
         '''
         When a guest wants to finish a purchase we get their information to be stored in their guest account. 
+        Also applies to customers wanting to update their personal information. 
         '''
         args = update_account_parser.parse_args()
-
-        return Put(args)
+        identity = get_jwt_identity()
+        return Put(args, identity)
 
 
 #########################################################

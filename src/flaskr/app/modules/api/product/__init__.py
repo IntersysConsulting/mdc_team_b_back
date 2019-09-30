@@ -17,6 +17,7 @@ from .user.get import Get as UserGet, Parser as get_product_parser
 from .admin.post import Post as AdminPost, Parser as product_add_parser
 from .admin.put import Put as AdminPut, Parser as product_update_parser
 from .admin.delete import Delete as AdminDelete, Parser as product_delete_parser
+from flask_jwt_extended import (get_jwt_identity, jwt_required)
 # For the documentation of the endpoints make the response replicate the data received
 # Implement two Namespaces per class, it will let us migrate to microservice if we decide on it
 # After you are done implementing your file add some lines to __init__.py
@@ -71,31 +72,37 @@ class AdminProducts(Resource):
     # This is how you make the endpoint expect something in the DATA field of the message.
     # You give it the parser corresponding to the action.
     @admin_ns.expect(product_add_parser)
+    @jwt_required
     def post(self):
         '''
         Adds a product to the database
         '''
         # To get the parameters from the DATA of the message we access them like this
+        identity = get_jwt_identity()
         args = product_add_parser.parse_args()
 
-        return AdminPost(args)
+        return AdminPost(args, identity)
 
     @admin_ns.response(200, 'Product successfully updated')
     @admin_ns.expect(product_update_parser)
+    @jwt_required
     def put(self):
         '''
         Updates a product on the database
         '''
+        identity = get_jwt_identity()
         args = product_update_parser.parse_args()
 
-        return AdminPut(args)
+        return AdminPut(args, identity)
 
     @admin_ns.response(200, 'Product sucessfully deleted')
     @admin_ns.expect(product_delete_parser)
+    @jwt_required
     def delete(self):
         '''
         Deletes a product from the database
         '''
+        identity = get_jwt_identity()
         args = product_delete_parser.parse_args()
 
-        return AdminDelete(args)
+        return AdminDelete(args, identity)

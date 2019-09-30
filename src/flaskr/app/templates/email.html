@@ -2,16 +2,19 @@
 <html lang="en">
   <head>
     <title>Welcome</title>
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./email.css">
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./email.css" />
     <style>
       * {
-        font-family: 'Open Sans', sans-serif;
+        font-family: "Open Sans", sans-serif;
         color: black;
       }
 
       .container {
-        border: solid 4px #116CB4;
+        border: solid 4px #116cb4;
         width: 100%;
         padding-top: 0.5em;
         margin: 0px;
@@ -38,7 +41,7 @@
       }
 
       .link {
-        background-color: #F98F3E;
+        background-color: #f98f3e;
         padding-top: 1em;
         padding-bottom: 1em;
         margin: 0px;
@@ -49,21 +52,48 @@
       a {
         text-decoration: none;
       }
+      .code {
+        display: block;
+        background: #f98f3e;
+        color: white;
+        font-weight: bold;
+        text-align: center;
+        font-size: 3rem;
+      }
     </style>
   </head>
-<body>
-  <div class="container">
-    <img src="cid:Myimage">
-    <h3 class="title">Welcome</h3>
-    <hr>
-    <p class="text">
-    Please go to the next link and create a new password
-    </p>
-    <a href="http://localhost:3000/admin/management/createPassword/{{email}}/{{code}}">
-      <p class="link">
-      http://localhost:3000/admin/management/createPassword/{{email}}/{{code}}
+  <body>
+    <div class="container">
+      <img src="cid:Myimage" />
+      <h3 class="title">
+        eCommerce
+      </h3>
+      <hr />
+      <p class="text">
+        There was a password reset requested from your account at eCommerce. If
+        you did not request this, delete this email and contact our
+        administrators.
+        <br /><br /><br />
+        Click on the code to reset your password.
+        <br />
+        <a
+          href="http://localhost:3000/admin/management/createPassword/{{
+            email
+          }}/{{ code }}"
+        >
+          <p class="code">
+            {{ code }}
+          </p>
+        </a>
       </p>
-    </a>
-  </div>
-</body>
+
+      <p class="text">
+        If you can't click on this email copy and paste this link in your
+        browser, then enter your code. <br /><br />
+        http://localhost:3000/admin/management/createPassword/{{ email }}/{{
+          code
+        }}
+      </p>
+    </div>
+  </body>
 </html>

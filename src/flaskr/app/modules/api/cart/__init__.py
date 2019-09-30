@@ -2,10 +2,9 @@ from flask_restplus import Resource, Namespace
 #from ..resources.cart import UserCart # Not yet implemented
 # from werkzeug.datastructures import FileStorage  # Only import if needs files
 from .get import Get, Parser as get_cart_parser
-from .post import Post, Parser as add_item_parser
 from .put import Put, Parser as update_item_parser
 from .delete import Delete, Parser as delete_item_parser
-
+from flask_jwt_extended import (get_jwt_identity, jwt_required)
 any_ns = Namespace(
     "carts",
     description=
@@ -25,23 +24,14 @@ class Cart(Resource):
     #############
     @any_ns.response(200, "Cart was found")
     @any_ns.expect(get_cart_parser)
+    @jwt_required
     def get(self):
         '''
         Returns the user's cart based on their JWT token.
         '''
+        identity = get_jwt_identity()
         args = get_cart_parser.parse_args()
-        return Get(args)
-
-    @any_ns.response(200, "Product successfully added to the cart")
-    @any_ns.response(400, "Product ID does not exist")
-    @any_ns.expect(add_item_parser)
-    def post(self):
-        '''
-        Adds a new item to the user's cart (Item must not exist in the cart)
-        If the item already exists in the cart this responds with a message that states No changes. 
-        '''
-        args = add_item_parser.parse_args()
-        return Post(args)
+        return Get(args, identity)
 
     #############
     # PUT
@@ -53,12 +43,14 @@ class Cart(Resource):
     @any_ns.response(200, "Product quantity successfully updated")
     @any_ns.response(400, "Product ID does not exist")
     @any_ns.expect(update_item_parser)
+    @jwt_required
     def put(self):
         '''
-        Updates quantity on an item that is already in the user's cart (New quantity must be greater than 1)
+        Creates a user's cart if they don't have one, and changes the amount of items a user has of an item.
         '''
+        identity = get_jwt_identity()
         args = update_item_parser.parse_args()
-        return Put(args)
+        return Put(args, identity)
 
     #############
     # DELETE

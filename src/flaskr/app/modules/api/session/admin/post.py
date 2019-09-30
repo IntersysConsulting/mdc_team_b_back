@@ -46,4 +46,4 @@ def Post(args):
         response = jsonify({"statusCode": 400, "message": "Wrong email"})
     else:
         response = jsonify({"statusCode": 400, "message": "Unexpected error"})
-        return response
+    return response

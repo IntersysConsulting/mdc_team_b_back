@@ -14,22 +14,23 @@ class UserProduct():
         self.db = Database()
 
     def GetOne(self, id):
-        return self.db.find(self.collection_name, {"_id": ObjectId(id)})
+        return self.dump(self.db.find(self.collection_name, {"_id": ObjectId(id)}))
 
     # def GetAll(self):
     #     pass
 
-    def GetProducts(self, filter, sort, ascending=True, page=0):
-        print("Trying to get all products with {} as filter and {} as sort".
-              format(filter, sort))
+    def GetProducts(self, filter, sort, ascending=True, page=0, page_size=None):
         output = []
+        selector = {'name': {'$regex': r''}}
+
+        total = self.db.get_count(self.collection_name, selector )
+        print("The total I got was {}".format(total))
         products = self.db.find_all(self.collection_name,
-                                    {'name': {
-                                        '$regex': r''
-                                    }}, sort, ascending, page)
+                                    selector, sort, ascending, page, page_size=page_size)
         for product in products:
             output.append(self.dump(product))
-        return output
+
+        return output, total
 
     def dump(self, data):
         return ProductSchema().dump(data).data

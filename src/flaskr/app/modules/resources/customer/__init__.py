@@ -8,6 +8,7 @@ from ..password_management import hash_password, verify_hash
 from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt_identity, jwt_required)
 from bson.objectid import ObjectId
+from ..validation import is_guest, is_customer, is_customer_email_available
 
 
 #
@@ -21,7 +22,8 @@ class CustomerManager():
         result = self.db.create(self.collection_name, new_user)
         return result
 
-    def add(self, _id, first_name, last_name, email, password, phone):
+    def create_new_customer(self, _id, first_name, last_name, email, password,
+                            phone):
         now = datetime.now()
         # _id = get_jwt_identity()
         print("An account is trying to be created with the id: {}".format(_id))
@@ -31,9 +33,7 @@ class CustomerManager():
                 "is_guest": True
             })
             if is_user_guest:
-                email_is_available = (self.db.find(self.collection_name,
-                                                   {"email": email}) == None)
-
+                email_is_available = is_customer_email_available(email)
                 if email_is_available:
                     new_user = {
                         "first_name": first_name,
@@ -91,12 +91,58 @@ class CustomerManager():
 
         return response
 
-    def updateInfo(self, user_id, user_obj):
-        pass
+    def update_info(self,
+                    _id,
+                    first_name=None,
+                    last_name=None,
+                    email=None,
+                    phone=None):
+        if is_guest(_id):
+            if (first_name == None or last_name == None or email == None):
+                # Guest must not leave any of these blank
+                response = -1
 
-    def GetUserData(self, user_id):
-        db.find_all(self.collection_name, user_id)
-        pass
+            else:
+                # Guest can update their account
+                email_valid = is_customer_email_available(email)
+
+        elif is_customer(_id):
+            # The customer can update their account
+            email_valid = True if email == None else is_customer_email_available(
+                email, _id)
+
+        else:
+            # This is not a person we can update
+            response = -2
+
+        # If there is a non-guest customer that already has that email...
+
+        if email_valid:
+            update_fields = {}
+            if first_name != None:
+                update_fields["first_name"] = first_name
+            if last_name != None:
+                update_fields["last_name"] = last_name
+            if email != None:
+                update_fields["email"] = email
+            if phone != None:
+                update_fields["phone"] = phone
+
+            print("Updating {} with {}".format(_id, update_fields))
+
+            response = self.db.update(self.collection_name,
+                                      {"_id": ObjectId(_id)},
+                                      {"$set": update_fields})
+        elif not email_valid:
+            # If the email is taken already
+            response = -3
+
+        return response
+
+    def get_data(self, _id):
+        return self.dump(self.db.find(self.collection_name,
+                                      {"_id": ObjectId(_id)}),
+                         only_personal=True)
 
     def add_billing(self, user_id, billing_obj):
         pass
@@ -116,5 +162,8 @@ class CustomerManager():
     def delete_shipping(self, user, shipping_obj_id):
         pass
 
-    def dump(self, data):
-        return CustomerSchema().dump(data).data
+    def dump(self, data, only_personal=False):
+        _personal_data_exclusion = [
+            '_id', 'password', 'terms_of_service_ts', 'is_guest'
+        ] if only_personal else []
+        return CustomerSchema(exclude=_personal_data_exclusion).dump(data).data

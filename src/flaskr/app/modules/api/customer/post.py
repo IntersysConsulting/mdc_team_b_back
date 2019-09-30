@@ -42,7 +42,8 @@ def Post(args, _id):
 
     cm = CustomerManager()
 
-    result = cm.add(_id, first_name, last_name, email, password, phone)
+    result = cm.create_new_customer(_id, first_name, last_name, email,
+                                    password, phone)
 
     if result == 1:
 
