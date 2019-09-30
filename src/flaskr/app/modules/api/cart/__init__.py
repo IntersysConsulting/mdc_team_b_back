@@ -5,7 +5,7 @@ from .get import Get, Parser as get_cart_parser
 from .post import Post, Parser as add_item_parser
 from .put import Put, Parser as update_item_parser
 from .delete import Delete, Parser as delete_item_parser
-
+from flask_jwt_extended import (get_jwt_identity, jwt_required)
 any_ns = Namespace(
     "carts",
     description=
@@ -53,12 +53,14 @@ class Cart(Resource):
     @any_ns.response(200, "Product quantity successfully updated")
     @any_ns.response(400, "Product ID does not exist")
     @any_ns.expect(update_item_parser)
+    @jwt_required
     def put(self):
         '''
         Updates quantity on an item that is already in the user's cart (New quantity must be greater than 1)
         '''
+        identity = get_jwt_identity()
         args = update_item_parser.parse_args()
-        return Put(args)
+        return Put(args, identity)
 
     #############
     # DELETE

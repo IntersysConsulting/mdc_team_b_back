@@ -62,3 +62,6 @@ class Mongo:
 
     def delete(self, collection, selector):
         return self.db[collection].delete_one(selector).deleted_count
+
+    def aggregate(self, collection, query):
+        return self.db[collection].aggregate(query)

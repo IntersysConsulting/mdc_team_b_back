@@ -1,21 +1,15 @@
 from flask import jsonify
 from flask_restplus.namespace import RequestParser
+from ...resources.cart import CartManager
 
 #################
 # Parser        #
 #################
 
 Parser = RequestParser()
-Parser.add_argument(
-    'Authorization',
-    help=
-    "The autorization token bearer. This is a placeholder and should be handled with JWT.",
-    required=True,
-    location="headers")
-Parser.add_argument(
-    'product_id',
-    help="The ObjectID of the product to be affected.",
-    required=True)
+Parser.add_argument('product_id',
+                    help="The ObjectID of the product to be affected.",
+                    required=True)
 Parser.add_argument(
     'quantity',
     type=int,
@@ -26,18 +20,36 @@ Parser.add_argument(
 # Method        #
 #################
 
-def Put(args):
-    token = args['Authorization']
-    pid = args['product_id']
-    quantity = args['quantity']
 
-    code = 200 if quantity > 0 else 406
-    msg = "OK" if quantity > 0 else "Less than 1"
-    return jsonify({
-        "statusCode": code,
-        "data": {
-            "Auth": token,
-            "product_id": pid,
-            "quantity": quantity
-        }
-    })
+def Put(args, identity):
+    product_id = args['product_id']
+    quantity = args['quantity']
+    customer_id = identity
+
+
+    if quantity < 0:
+        response = jsonify({
+            "statusCode": 406,
+            "message":"Can't accept negative products."
+        })
+    else:
+        cm = CartManager()
+        result = cm.put_in_cart(customer_id, product_id, quantity)
+
+        if result == 0:
+            response = jsonify({
+                "statusCode": 400,
+                "message": "Could not update for some reason."
+            })
+        elif result==1:
+            response = jsonify({
+                "statusCode": 200,
+                "message": "Successfully updated the product."
+            })
+        else:
+            response = jsonify({
+                "statusCode": 400,
+                "message": "Unknown error with result = {}.".format(result)
+            })
+
+    return response

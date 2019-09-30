@@ -37,3 +37,6 @@ class Database(object):
 
     def delete(self, table, selector):
         return self.client.delete(table, selector)
+
+    def aggregate(self, table, query):
+        return self.client.aggregate(table, query)
