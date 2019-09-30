@@ -55,6 +55,11 @@ class CartManager():
             "last_updated": now,
             "products": []
         })
+        # Also updates the customer with their cart ID
+        self.db.update("customers", {"_id": ObjectId(customer_id)},
+                       {"$set": {
+                           "cart": ObjectId(result.inserted_id)
+                       }})
         return result.inserted_id
 
     def get_cart_info(self, cart_id):
