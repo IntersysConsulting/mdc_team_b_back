@@ -17,8 +17,7 @@ from .user.get import Get as UserGet, Parser as get_product_parser
 from .admin.post import Post as AdminPost, Parser as product_add_parser
 from .admin.put import Put as AdminPut, Parser as product_update_parser
 from .admin.delete import Delete as AdminDelete, Parser as product_delete_parser
-from flask_jwt_extended import (create_access_token, create_refresh_token,
-                                get_jwt_identity, jwt_required)
+from flask_jwt_extended import (get_jwt_identity, jwt_required)
 # For the documentation of the endpoints make the response replicate the data received
 # Implement two Namespaces per class, it will let us migrate to microservice if we decide on it
 # After you are done implementing your file add some lines to __init__.py

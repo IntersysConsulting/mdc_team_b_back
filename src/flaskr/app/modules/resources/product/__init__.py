@@ -14,7 +14,7 @@ class UserProduct():
         self.db = Database()
 
     def GetOne(self, id):
-        return self.db.find(self.collection_name, {"_id": ObjectId(id)})
+        return self.dump(self.db.find(self.collection_name, {"_id": ObjectId(id)}))
 
     # def GetAll(self):
     #     pass
