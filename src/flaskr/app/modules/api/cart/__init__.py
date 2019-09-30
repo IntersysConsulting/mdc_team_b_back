@@ -46,7 +46,7 @@ class Cart(Resource):
     @jwt_required
     def put(self):
         '''
-        Updates quantity on an item that is already in the user's cart (New quantity must be greater than 1)
+        Creates a user's cart if they don't have one, and changes the amount of items a user has of an item.
         '''
         identity = get_jwt_identity()
         args = update_item_parser.parse_args()
