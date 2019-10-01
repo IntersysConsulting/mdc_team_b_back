@@ -1,16 +1,12 @@
 from flask import jsonify
 from flask_restplus.namespace import RequestParser
-
+from ...resources.validation import is_admin, is_not_admin_response
 #################
 # Parser        #
 #################
 
 Parser = RequestParser()
-Parser.add_argument('Authorization',
-                    help="Admin's session token",
-                    required=True)
 Parser.add_argument('id',
-                    type=int,
                     help='ID of the admin to be deleted',
                     required=True,
                     location='form')
@@ -20,7 +16,13 @@ Parser.add_argument('id',
 #################
 
 
-def Delete(args):
+def Delete(args, identity):
+
+    if not is_admin(identity):
+        response = is_not_admin_response
+    else:
+        pass
+
     admin_id = args['id']
 
     response = jsonify({
