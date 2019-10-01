@@ -50,7 +50,7 @@ def Put(args, identity):
     name = None if not args['name'] else args['name']
     price = None if not args['price'] else args['price']
     picture = None if not args['picture'] else args['picture']
-    description = 'No description' if not args['description'] else args[
+    description = None if not args['description'] else args[
         'description']  #Do this for optional fields
     digital = None if not args['digital'] else args['digital']
     image_name = None
