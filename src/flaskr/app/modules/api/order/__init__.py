@@ -10,6 +10,7 @@ from .user.put import Put as UserPut, Parser as user_order_update_parser
 from .user.delete import Delete as UserDelete, Parser as user_order_delete_parser
 from .admin.get import Get as AdminGet, Parser as admin_order_get_parser
 from .admin.put import Put as AdminPut, Parser as admin_order_update_parser
+from flask_jwt_extended import (get_jwt_identity, jwt_required)
 
 user_ns = Namespace(
     "orders",
@@ -25,18 +26,20 @@ admin_ns = Namespace(
 
 @user_ns.route("/")
 class UserOrders(Resource):
+    @jwt_required
     @user_ns.expect(user_order_get_parser)
     def get(self):
         '''
         Returns a sorted and filtered list of orders that the user has made
         '''
         args = user_order_get_parser.parse_args()
-
-        return UserGet(args)
+        identity = get_jwt_identity()
+        return UserGet(args, identity)
 
     @user_ns.response(200, 'Order succesfully added')
     @user_ns.response(403, 'Customer already has an order')
     @user_ns.expect(user_order_add_parser)
+    @jwt_required
     def post(self):
         '''
         Creates new order "In Checkout"
@@ -47,27 +50,30 @@ class UserOrders(Resource):
         If the user already has an In Checkout order the user should be prompted to delete the old one or to resume with this one. 
         '''
         args = user_order_add_parser.parse_args()
-
-        return UserPost(args)
+        identity = get_jwt_identity()
+        return UserPost(args, identity)
 
     @user_ns.response(403, "User does not have an order to update")
     @user_ns.expect(user_order_update_parser)
+    @jwt_required
     def put(self):
         '''
         Finishes an user's order by adding in billing, shipping and payment information after it was reviewed. 
         This should also clear up the user's cart. 
         '''
         args = user_order_add_parser.parse_args()
-
-        return UserPut(args)
+        identity = get_jwt_identity()
+        return UserPut(args, identity)
 
     @user_ns.expect(user_order_delete_parser)
+    @jwt_required
     def delete(self):
         '''
         Deletes the user's "In Checkout" order. This happens if the user backs-down from checkout. 
         '''
         args = user_order_get_parser.parse_args()
-        return UserDelete(args)
+        identity = get_jwt_identity()
+        return UserDelete(args, identity)
 
 
 #########################################################

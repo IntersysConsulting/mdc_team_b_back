@@ -10,7 +10,7 @@ class Database(object):
     def find_all(self,
                  table,
                  selector,
-                 sort,
+                 sort=None,
                  asc=True,
                  next_page=0,
                  page_size=None):
@@ -20,7 +20,6 @@ class Database(object):
             .format(table, selector, sort, next_page, get_page_size))
         result = self.client.find_all(table, selector, sort, asc, next_page,
                                       get_page_size)
-        print("The database returned {} results".format(len(result)))
         return result
 
     def get_count(self, table, selector):
