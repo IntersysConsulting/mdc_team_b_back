@@ -67,7 +67,10 @@ def Put(args, identity):
             print("Image result was: {}".format(image_result))
             image_name = image_result["link"]
             tmpDir.cleanup()
-
+        else:
+            image_name = None
+            image_result = {"status": 200}
+            #Pretend it was successful
         ap = AdminProduct()
         result = ap.update_product(pId,
                                    name,
