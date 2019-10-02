@@ -5,10 +5,6 @@ from flask_restplus.namespace import RequestParser
 # Parser        #
 #################
 Parser = RequestParser()
-Parser.add_argument('Authorization',
-                    help="Customer's token",
-                    required=True,
-                    location="headers")
 Parser.add_argument('sort',
                     type=int,
                     help='ID of the sorting method to be used',
@@ -26,9 +22,7 @@ Parser.add_argument('page',
 #################
 
 
-def Get(args):
-    token = args[
-        'Authorization']  #sends auth token to get user id and then the orders
+def Get(args, identity):
     filter = " " if not args['filter'] else args['filter']
     sort = 0 if not args['sort'] else args['sort']
     page = 0 if not args['page'] else args['page']
@@ -37,7 +31,7 @@ def Get(args):
         "statusCode": 200,
         'message': 'Success',
         "data": {
-            "Auth": token,
+            "Auth": identity,
             "sort": sort,
             "filter": filter,
             "page": page
