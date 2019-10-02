@@ -4,8 +4,8 @@ from ...resources.order import AdminOrder, UserOrder
 # FileStorage allows us to import files from http requests.
 # from werkzeug.datastructures import FileStorage
 
-from .user.get import Get as UserGet, Parser as user_order_add_parser
-from .user.post import Post as UserPost, Parser as user_order_get_parser
+from .user.get import Get as UserGet, Parser as user_order_get_parser
+from .user.post import Post as UserPost, Parser as user_order_post_parser
 from .user.put import Put as UserPut, Parser as user_order_update_parser
 from .user.delete import Delete as UserDelete, Parser as user_order_delete_parser
 from .admin.get import Get as AdminGet, Parser as admin_order_get_parser
@@ -30,7 +30,7 @@ class UserOrders(Resource):
     @user_ns.expect(user_order_get_parser)
     def get(self):
         '''
-        Returns a sorted and filtered list of orders that the user has made
+        NYI Returns a sorted and filtered list of orders that the user has made
         '''
         args = user_order_get_parser.parse_args()
         identity = get_jwt_identity()
@@ -38,18 +38,18 @@ class UserOrders(Resource):
 
     @user_ns.response(200, 'Order succesfully added')
     @user_ns.response(403, 'Customer already has an order')
-    @user_ns.expect(user_order_add_parser)
+    @user_ns.expect(user_order_post_parser)
     @jwt_required
     def post(self):
         '''
-        Creates new order "In Checkout"
+        √ Creates new order "In Checkout"
         It should be called as soon as the checkout button is clicked to freeze the items in. 
         It gets the item-list from the user's token by grabbing the cart ID. Then using it to grab a list of product IDs, which then it recovers.
         It will save the items as complete objects at the time it is created.
         Assigns a unique "In Checkout" status to the order. An user may not create more orders if it has an "In Checkout" order. 
         If the user already has an In Checkout order the user should be prompted to delete the old one or to resume with this one. 
         '''
-        args = user_order_add_parser.parse_args()
+        args = user_order_post_parser.parse_args()
         identity = get_jwt_identity()
         return UserPost(args, identity)
 
@@ -58,10 +58,10 @@ class UserOrders(Resource):
     @jwt_required
     def put(self):
         '''
-        Finishes an user's order by adding in billing, shipping and payment information after it was reviewed. 
+        NYI Finishes an user's order by adding in billing, shipping and payment information after it was reviewed. 
         This should also clear up the user's cart. 
         '''
-        args = user_order_add_parser.parse_args()
+        args = user_order_update_parser.parse_args()
         identity = get_jwt_identity()
         return UserPut(args, identity)
 
@@ -69,9 +69,9 @@ class UserOrders(Resource):
     @jwt_required
     def delete(self):
         '''
-        Deletes the user's "In Checkout" order. This happens if the user backs-down from checkout. 
+        NYI Deletes the user's "In Checkout" order. This happens if the user backs-down from checkout. 
         '''
-        args = user_order_get_parser.parse_args()
+        args = user_order_delete_parser.parse_args()
         identity = get_jwt_identity()
         return UserDelete(args, identity)
 
@@ -88,7 +88,7 @@ class AdminOrders(Resource):
     @admin_ns.expect(admin_order_update_parser)
     def put(self):
         '''
-        Updates a order status on the database
+        NYI Updates a order status on the database
         '''
         args = admin_order_update_parser.parse_args()
         return AdminPut(args)
@@ -96,7 +96,7 @@ class AdminOrders(Resource):
     @admin_ns.expect(admin_order_get_parser)
     def get(self):
         """
-        Returns a list of orders from all the users. May be sorted and filtered.
+        NYI Returns a list of orders from all the users. May be sorted and filtered.
         """
         args = admin_order_get_parser.parse_args()
         return AdminGet(args)

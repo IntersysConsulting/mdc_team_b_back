@@ -21,11 +21,12 @@ class CartManager():
             # Since the cart is new we must push a value
             command = "$push"
             where = "products"
+
         else:
             cart_id = cart["_id"]
             try:
                 #This line makes a list with all the product ids, then asks what the index of the product_id is.
-                products = [x['product'] for x in cart['products']]
+                products = [str(x['product']) for x in cart['products']]
                 index_to_insert_on = products.index(product_id)
                 command = "$set"
                 where = "products.{}".format(index_to_insert_on)
@@ -33,6 +34,7 @@ class CartManager():
                 # .index raises an exception if the value doesn't exist on the array, so, it means we must push instead of $set
                 command = "$push"
                 where = "products"
+
 
         result = self.db.update(self.collection_name,
                                 {"_id": ObjectId(cart_id)}, {

@@ -23,7 +23,7 @@ class CustomerSession(Resource):
     @customer_ns.expect(customer_login_parser)
     def post(self):
         '''
-        Allows the customer to log in with their email and password
+        √ Allows the customer to log in with their email and password
         '''
         args = customer_login_parser.parse_args()
         return CustomerPost(args)
@@ -31,7 +31,7 @@ class CustomerSession(Resource):
     @customer_ns.expect(customer_logout_parser)
     def delete(self):
         '''
-        Allows the customer to log out of their current session
+        NYI Allows the customer to log out of their current session
         '''
         args = customer_logout_parser.parse_args()
         return CustomerDelete(args)
@@ -43,7 +43,7 @@ class AdminSession(Resource):
     @admin_ns.expect(admin_login_parser)
     def post(self):
         '''
-        Allows the admin to log in with their email and password
+        √ Allows the admin to log in with their email and password
         '''
         args = admin_login_parser.parse_args()
         return AdminPost(args)
@@ -51,7 +51,7 @@ class AdminSession(Resource):
     @admin_ns.expect(admin_logout_parser)
     def delete(self):
         '''
-        Allows the admin to log out of their current session
+        NYI Allows the admin to log out of their current session
         '''
         args = admin_logout_parser.parse_args()
         return AdminDelete(args)
@@ -59,7 +59,7 @@ class AdminSession(Resource):
     @admin_ns.expect(admin_refresh_token_parser)
     def put(self):
         '''
-        Allows the admin refresh the token
+        NYI Allows the admin refresh the token
         '''
         args = admin_logout_parser.parse_args()
         return AdminPut(args)

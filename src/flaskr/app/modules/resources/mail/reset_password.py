@@ -7,8 +7,7 @@ app = Flask(__name__)
 def send_reset_password_email(accessCode, email):
     msg = Message("Welcome",
                   sender='itersysecommerce@gmail.com',
-                  recipients=['rfigueroa@intersysconsulting.com'
-                              ])  # Should be changed to customer's email
+                  recipients=[email])  # Should be changed to customer's email
     with app.open_resource("../../../templates/logo.jpg") as fp:
         msg.attach('logo.jpg',
                    'image/jpg',
