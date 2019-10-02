@@ -5,10 +5,6 @@ from flask_restplus.namespace import RequestParser
 # Parser        #
 #################
 Parser = RequestParser()
-Parser.add_argument('Authorization',
-                    help='Customer token',
-                    required=True,
-                    location='form')
 #We need the old address to find the object we will replace
 Parser.add_argument('old_shipping_address',
                     help='Old billing address JSON object',

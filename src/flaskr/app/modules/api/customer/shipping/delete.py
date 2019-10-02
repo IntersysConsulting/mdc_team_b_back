@@ -5,10 +5,6 @@ from flask_restplus.namespace import RequestParser
 # Parser        #
 #################
 Parser = RequestParser()
-Parser.add_argument('Authorization',
-                                    help="Customer Token",
-                                    required=True,
-                                    location='headers')
 Parser.add_argument(
     'shipping',
     help="JSON object of the address to be deleted",
