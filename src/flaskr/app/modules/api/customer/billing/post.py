@@ -1,5 +1,6 @@
 from flask import jsonify
 from flask_restplus.namespace import RequestParser
+from flask_restplus import inputs
 from ....resources.customer import CustomerManager
 #################
 # Parser        #
@@ -16,7 +17,7 @@ Parser.add_argument(
     'is_default',
     help=
     'Blank for false, filled in if you want to override the current default',
-    type=bool,
+    type=inputs.boolean,
     required=False,
     location='form')
 
@@ -33,7 +34,7 @@ def Post(args, identity):
     zip_code = args['zip_code']
     first_name = args['first_name']
     last_name = args['last_name']
-    is_default = False if not args['is_default'] else True
+    is_default = args['is_default']
 
     cm = CustomerManager()
     result = cm.add_billing(identity, address, country, state, city, zip_code,

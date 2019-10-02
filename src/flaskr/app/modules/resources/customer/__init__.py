@@ -150,7 +150,11 @@ class CustomerManager():
             #Customer does not exist
             response = -1
         else:
-            addresses = [x for x in customer[array]]
+                
+            if  array in customer.keys():
+                addresses = [x for x in customer[array]]
+            else: 
+                addresses = []
 
             if new_address in addresses:
                 # Duplicate

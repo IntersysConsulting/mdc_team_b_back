@@ -1,5 +1,4 @@
 from marshmallow import Schema, fields
-from ..reset_token.schema import ResetTokenSchema
 
 
 class ShippingAddressSchema(Schema):
@@ -30,7 +29,6 @@ class CustomerSchema(Schema):
     last_name = fields.String()
     email = fields.Email()
     password = fields.String()
-    reset_token = fields.Nested(ResetTokenSchema)
     phone = fields.String()
     terms_of_service_ts = fields.Time()
     is_guest = fields.Bool()

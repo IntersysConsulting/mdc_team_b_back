@@ -21,8 +21,4 @@ def Put(args):
     '''
     _id = get_jwt_identity()
     access_token = create_access_token(identity=_id)
-    return jsonify({
-        "message": "Succesfully refreshed token",
-        "statusCode": 200,
-        'access_token': access_token
-    })
+    return {'access_token': access_token}
