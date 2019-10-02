@@ -6,7 +6,7 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt_identity, get_raw_jwt)
 from ...resources.password_management import hash_password, verify_hash
 from ...resources.mail.reset_password import send_reset_password_email
-
+from ...resources.validation import is_admin, is_not_admin_response
 #################
 # Parser        #
 #################
@@ -31,45 +31,54 @@ Parser.add_argument(
 #################
 
 
-def Post(args):
+def Post(args, identity):
     first_name = args['first_name']
     last_name = args['last_name']
     email = args['email']
+    if not is_admin(identity):
+        response = is_not_admin_response
+    else:
+        am = AdminManagement()
 
-    am = AdminManagement()
+        try:
+            result, accessCode = am.create_admin(first_name, last_name, email)
 
-    try:
-        result, accessCode = am.create_admin(first_name, last_name, email)
-
-        if result == 1:
-            # We could make the admin and reset it's password. Email was sent through AM.
-            send_reset_password_email(accesCode, email)
-            return jsonify({
-                "statusCode":
-                200,
-                "message":
-                "Created admin and requested password reset."
+            if result == 1:
+                # We could make the admin and reset it's password. Email was sent through AM.
+                send_reset_password_email(accesCode, email)
+                response = jsonify({
+                    "statusCode":
+                    200,
+                    "message":
+                    "Created admin and requested password reset."
+                })
+            elif result == 2:
+                response = jsonify({
+                    "statusCode":
+                    206,
+                    "message":
+                    "Created the admin but could not reset password."
+                })
+            elif result == 0:
+                response = jsonify({
+                    "statusCode": 400,
+                    "message": "Could not make the admin."
+                })
+            elif result == -1:
+                response = jsonify({
+                    "statusCode":
+                    410,
+                    "message":
+                    "There is an admin with that email already."
+                })
+            else:
+                response = jsonify({
+                    "statusCode": 400,
+                    "message": "Unexpected error."
+                })
+        except Exception:
+            response = jsonify({
+                "statusCode": 500,
+                'message': "Internal server error"
             })
-        elif result == 2:
-            return jsonify({
-                "statusCode":
-                206,
-                "message":
-                "Created the admin but could not reset password."
-            })
-        elif result == 0:
-            return jsonify({
-                "statusCode": 400,
-                "message": "Could not make the admin."
-            })
-        elif result == -1:
-            return jsonify({
-                "statusCode":
-                410,
-                "message":
-                "There is an admin with that email already."
-            })
-        else:
-            return jsonify({"statusCode": 400, "message": "Unexpected error."})
-    except Exception:
-        return jsonify({"statusCode": 500, 'message': "Internal server error"})
+    return response
