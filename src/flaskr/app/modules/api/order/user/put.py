@@ -52,6 +52,13 @@ def Put(args, identity):
             "statusCode": 200,
             'message': 'Order succesfully updated'
         })
+    elif result == 2:
+        response = jsonify({
+            "statusCode":
+            206,
+            'message':
+            'Order was updated but the cart could not be emptied.'
+        })
     else:
         response = jsonify({
             "statusCode": 400,

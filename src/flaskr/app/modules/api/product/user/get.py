@@ -41,9 +41,9 @@ def Get(args):
     up = UserProduct()
 
     if product_id != None:
-        productList, total = up.GetOne(product_id), 1
+        productList, total = up.get_one(product_id), 1
     else:
-        productList, total = up.GetProducts(filter,
+        productList, total = up.get_products(filter,
                                             sort,
                                             page=page,
                                             page_size=page_size)
