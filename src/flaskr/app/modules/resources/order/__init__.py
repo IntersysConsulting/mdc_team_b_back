@@ -106,6 +106,18 @@ class UserOrder():
 
         return response
 
+    def cancel_checkout(self, user_id):
+        order = self.find_in_checkout_order(user_id)
+        if order != None:
+            # User has an order to be checked out.
+            result = self.db.delete(self.collection_name,
+                                      {"_id": ObjectId(order["_id"])})
+            response = 1 if result == 1 else -1
+        else:
+            # No changes, still successful
+            response = 0
+        return response
+
     def GetUserOrders(self, user_id, filter, sort, ascending=True, page=0):
         Database.find_all(self.collection_name,
                           {'field': {
