@@ -25,6 +25,7 @@ Parser.add_argument('picture',
 Parser.add_argument('digital',
                     help="Whether the product is a digital product or not",
                     type=bool,
+                    required=True,
                     location='form')
 Parser.add_argument('description',
                     help='Description of the product to be added',

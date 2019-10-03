@@ -6,6 +6,7 @@ from ..password_management import hash_password, verify_hash
 from flask_jwt_extended import (create_access_token, create_refresh_token)
 from pymongo import errors
 import random
+from ..mail.reset_password import send_reset_password_email
 
 
 class AdminManagement:
@@ -58,15 +59,15 @@ class AdminManagement:
                 res, code = self.request_reset(email)
                 if code != None:
                     # If we were able to request resetting the password
-                    result = 1, code
+                    result = 1
                 else:
                     # If we failed to request the password reset
-                    result = -2, None
+                    result = -2
             else:
-                result = 0, None
+                result = 0
         except errors.DuplicateKeyError:
             #There is an admin with that email already!
-            result = -1, None
+            result = -1
         return result
 
     def delete_admin(self, id, email=None):
@@ -100,7 +101,7 @@ class AdminManagement:
             response = -3, None
         else:
             accessCode = random.randint(1000, 10000)
-
+            send_reset_password_email(accessCode, email)
             response = self.db.update(self.collection_name, {'email': email}, {
                 "$set": {
                     "reset_token": {

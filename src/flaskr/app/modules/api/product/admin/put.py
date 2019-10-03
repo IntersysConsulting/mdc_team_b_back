@@ -1,5 +1,6 @@
 from flask import jsonify
 from flask_restplus.namespace import RequestParser
+from flask_restplus import inputs
 from werkzeug.datastructures import FileStorage
 from ....resources.product import AdminProduct
 from ....resources.validation import is_admin, is_not_admin_response
@@ -32,7 +33,7 @@ Parser.add_argument(
     required=False)
 Parser.add_argument('digital',
                     help='Whether or not the product is digital',
-                    type=bool,
+                    type=inputs.boolean,
                     required=False,
                     location='form')
 Parser.add_argument('description',
@@ -52,8 +53,9 @@ def Put(args, identity):
     picture = None if not args['picture'] else args['picture']
     description = None if not args['description'] else args[
         'description']  #Do this for optional fields
-    digital = None if not args['digital'] else args['digital']
+    digital = args['digital']
     image_name = None
+
 
     if not is_admin(identity):
         response = jsonify(is_not_admin_response)

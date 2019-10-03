@@ -11,7 +11,6 @@ from bson.objectid import ObjectId
 from ..validation import is_guest, is_customer, is_customer_email_available
 
 
-#
 class CustomerManager():
     def __init__(self):
         self.collection_name = "customers"
@@ -40,13 +39,11 @@ class CustomerManager():
                         "last_name": last_name,
                         "email": email,
                         "password": hash_password(password),
-                        #"reset_token":"",
                         "phone": phone,
                         "terms_of_service_ts": now,
                         "is_guest": False,
-                        "shipping_addresses": {},
-                        "billing_addresses": {},
-                        "cart": ""
+                        "shipping_addresses": [],
+                        "billing_addresses": []
                     }
 
                     print("Making this new user: {}".format(new_user))
@@ -144,8 +141,64 @@ class CustomerManager():
                                       {"_id": ObjectId(_id)}),
                          only_personal=True)
 
-    def add_billing(self, user_id, billing_obj):
-        pass
+    def add_address(self, user_id, array, new_address, is_default):
+        #expects billing_addresses or shipping_addresses on array
+        customer = self.db.find(self.collection_name,
+                                {"_id": ObjectId(user_id)})
+
+        if customer == None:
+            #Customer does not exist
+            response = -1
+        else:
+                
+            if  array in customer.keys():
+                addresses = [x for x in customer[array]]
+            else: 
+                addresses = []
+
+            if new_address in addresses:
+                # Duplicate
+                response = -2
+            elif is_default and len(addresses) > 0:
+                address_to_be_pushed = addresses[-1]
+                result = self.db.update(
+                    self.collection_name, {"_id": ObjectId(user_id)},
+                    {"$push": {
+                        array: address_to_be_pushed
+                    }})
+                if result == 1:
+                    # Replace the old default with the new one
+                    response = self.db.update(
+                        self.collection_name, {"_id": ObjectId(user_id)},
+                        {"$set": {
+                            "{}.0".format(array): new_address
+                        }})
+                    # Should undo the damage if something fails here
+                else:
+                    # Could not replace
+                    response = -3
+            else:
+                response = self.db.update(self.collection_name,
+                                          {"_id": ObjectId(user_id)},
+                                          {"$push": {
+                                              array: new_address
+                                          }})
+        return response
+
+    def add_billing(self, user_id, address, country, state, city, zip_code,
+                    first_name, last_name, is_default):
+
+        new_address = {
+            "address": address,
+            "country": country,
+            "state": state,
+            "city": city,
+            "zip_code": zip_code,
+            "first_name": first_name,
+            "last_name": last_name
+        }
+        return self.add_address(user_id, "billing_addresses", new_address,
+                                is_default)
 
     def update_billing(self, user_id, billing_obj_id, billing_obj):
         pass
@@ -153,8 +206,22 @@ class CustomerManager():
     def delete_billing(self, user_id, billing_obj_id):
         pass
 
-    def add_shipping(self, user_id, shipping_obj):
-        pass
+    def add_shipping(self, user_id, address, between, country, state, city,
+                     zip_code, first_name, last_name, delivery_notes,
+                     is_default):
+        new_address = {
+            "address": address,
+            "between": between,
+            "country": country,
+            "state": state,
+            "city": city,
+            "zip_code": zip_code,
+            "first_name": first_name,
+            "last_name": last_name,
+            "delivery_notes": delivery_notes
+        }
+        return self.add_address(user_id, "shipping_addresses", new_address,
+                                is_default)
 
     def update_shipping(self, user_id, shipping_obj_id, shipping_obj):
         pass

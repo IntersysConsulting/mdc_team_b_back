@@ -27,7 +27,7 @@ class Cart(Resource):
     @jwt_required
     def get(self):
         '''
-        Returns the user's cart based on their JWT token.
+        √ Returns the user's cart based on their JWT token.
         '''
         identity = get_jwt_identity()
         args = get_cart_parser.parse_args()
@@ -46,7 +46,7 @@ class Cart(Resource):
     @jwt_required
     def put(self):
         '''
-        Creates a user's cart if they don't have one, and changes the amount of items a user has of an item.
+        √  Creates a user's cart if they don't have one, and changes the amount of items a user has of an item.
         '''
         identity = get_jwt_identity()
         args = update_item_parser.parse_args()
@@ -61,7 +61,7 @@ class Cart(Resource):
     @any_ns.expect(delete_item_parser)
     def delete(self):
         '''
-        Removes an item from the user's cart 
+        NYI Removes an item from the user's cart 
         '''
         args = delete_item_parser.parse_args()
         return Delete(args)

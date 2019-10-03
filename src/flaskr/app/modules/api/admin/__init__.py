@@ -26,7 +26,7 @@ class Admin(Resource):
     @jwt_required
     def get(self):
         '''
-        Returns currently registered admins. May be sorted A-Z, Z-A, oldest first, newest first.
+        NYI Returns currently registered admins. May be sorted A-Z, Z-A, oldest first, newest first.
         '''
         args = get_admin_parser.parse_args()
         identity = get_jwt_identity()
@@ -37,7 +37,7 @@ class Admin(Resource):
     @jwt_required
     def post(self):
         '''
-        Registers a new admin in the database
+        √ Registers a new admin in the database
         '''
         args = add_admin_parser.parse_args()
         identity = get_jwt_identity()
@@ -48,7 +48,7 @@ class Admin(Resource):
     @jwt_required
     def put(self):
         '''
-        Updates the issuing admin's information
+        NYI Updates the issuing admin's information
         '''
         identity = get_jwt_identity()
         return Put(request.json, identity)
@@ -58,7 +58,7 @@ class Admin(Resource):
     @jwt_required
     def delete(self):
         '''
-        Deletes an admin from the database
+        NYI Deletes an admin from the database
         '''
         args = delete_admin_parser.parse_args()
         identity = get_jwt_identity()
@@ -70,7 +70,7 @@ class PasswordReset(Resource):
     @admin_ns.expect(request_password_parser)
     def post(self):
         '''
-        Requests a password reset for an admin
+        √ Requests a password reset for an admin
         '''
         args = request_password_parser.parse_args()
         return ResetPost(args)
@@ -78,7 +78,7 @@ class PasswordReset(Resource):
     @admin_ns.expect(reset_password_parser)
     def put(self):
         '''
-        Allows an admin to reset their password if they requested it
+        √ Allows an admin to reset their password if they requested it
         '''
         args = reset_password_parser.parse_args()
         return ResetPut(args)
