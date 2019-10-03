@@ -5,6 +5,7 @@ from datetime import datetime
 from bson.objectid import ObjectId
 from ..cart import CartManager
 from ..product import UserProduct
+from ..customer import CustomerManager
 # In this file we implement methods that serve as a middle point between the exposed endpoint and the
 # actual middleware.
 # Validate operation logic here, not permission to access it.
@@ -20,6 +21,13 @@ class UserOrder():
             key = tmp_statuses[i]["name"]
             value = str(tmp_statuses[i]["_id"])
             self.statuses[key] = value
+
+    def find_in_checkout_order(self, user_id):
+        return self.db.find(
+            self.collection_name, {
+                "customer_id": ObjectId(user_id),
+                "status": ObjectId(self.statuses["In checkout"])
+            })
 
     def make_order(self, cart, user_id):
         '''
@@ -62,11 +70,7 @@ class UserOrder():
     def checkout_order(self, user_id):
         cm = CartManager()
         cart = cm.get_cart(user_id)
-        if self.db.find(
-                self.collection_name, {
-                    "customer_id": ObjectId(user_id),
-                    "status": ObjectId(self.statuses["In checkout"])
-                }) != None:
+        if self.find_in_checkout_order(user_id) != None:
             # User already has an order in checkout
             response = -2
         elif not cart:
@@ -81,7 +85,26 @@ class UserOrder():
         return response
 
     def finish_order(self, user_id, shipping, billing, payment):
-        pass
+        # TODO: Implement payment
+        order = self.find_in_checkout_order(user_id)
+        if order == None:
+            #Customer didn't POST before PUTting
+            response = -1
+        else:
+            cm = CustomerManager()
+            customer = cm.get_data(user_id)
+            billing_address = customer["billing_addresses"][billing]
+            shipping_address = customer["shipping_addresses"][shipping]
+            response = self.db.update(
+                self.collection_name, {"_id": order["_id"]}, {
+                    "$set": {
+                        "billing_address": billing_address,
+                        "shipping_address": shipping_address,
+                        "payment": payment
+                    }
+                })
+
+        return response
 
     def GetUserOrders(self, user_id, filter, sort, ascending=True, page=0):
         Database.find_all(self.collection_name,
