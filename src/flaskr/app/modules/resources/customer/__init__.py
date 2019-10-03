@@ -222,7 +222,7 @@ class CustomerManager():
             can_update = False
             response = -1
         else:
-            addresses = customer[array]            
+            addresses = customer[array]
             if(index>len(addresses)-1):
                 # Index out of range
                 response = -2
@@ -270,7 +270,7 @@ class CustomerManager():
                      zip_code, first_name, last_name, delivery_notes,
                      is_default):
 
-        new_address = make_address(address, between, country, state, city,
+        new_address = self.make_address(address, between, country, state, city,
                                    zip_code, first_name, last_name,
                                    delivery_notes)
         return self.add_address(user_id, "shipping_addresses", new_address,
@@ -279,8 +279,13 @@ class CustomerManager():
 
 
 
-    def update_shipping(self, user_id, billing_obj_id, billing_obj):
-        pass
+    def update_shipping(self, user_id, index, address, between, country, state, city,
+                     zip_code, first_name, last_name, delivery_notes,
+                     is_default):
+        new_fields = self.make_address(address, between, country, state, city,
+                                       zip_code, first_name, last_name, delivery_notes)
+        return self.update_address(user_id, "shipping_addresses", new_fields,
+                                   index, is_default)
 
     def delete_shipping(self, user, shipping_obj_id):
         pass
