@@ -5,8 +5,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_mail import Mail
 from modules.api import v1_blueprint
-from modules.resources.reset_token import RevokedTokenModel
-
+from modules.resources.token import is_revoked
 
 app = Flask(__name__)
 # CORS(app, resources={ r"*": { 'origins': 'http://localhost:3000' } })
@@ -20,6 +19,7 @@ app.config['MAIL_USERNAME'] = 'intersysecommerce@gmail.com'
 app.config['MAIL_PASSWORD'] = 'IntersysConsulting3#'
 
 app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
+app.config['JWT_BLACKLIST_ENABLED'] = True
 app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 
 jwt = JWTManager(app)
@@ -27,10 +27,13 @@ jwt = JWTManager(app)
 # v1_blueprint = Blueprint('api', __name__, url_prefix='/api/v1/')
 app.register_blueprint(v1_blueprint)
 
+
 @jwt.token_in_blacklist_loader
 def check_if_token_in_blacklist(decrypted_token):
     jti = decrypted_token['jti']
-    return RevokedTokenModel.is_jti_blacklisted(jti)
+    result = is_revoked(jti)
+    return result
+
 
 if __name__ == "__main__":
     mail.init_app(app)

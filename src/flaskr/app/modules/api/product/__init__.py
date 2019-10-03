@@ -49,7 +49,7 @@ class Product(Resource):
     @any_ns.expect(get_product_parser)
     def get(self):
         '''
-        Returns a list of products. May be sorted, and filtered optionally.
+        √ Returns a list of products. May be sorted, and filtered optionally.
         '''
         args = get_product_parser.parse_args()
 
@@ -75,7 +75,7 @@ class AdminProducts(Resource):
     @jwt_required
     def post(self):
         '''
-        Adds a product to the database
+        √ Adds a product to the database
         '''
         # To get the parameters from the DATA of the message we access them like this
         identity = get_jwt_identity()
@@ -88,7 +88,7 @@ class AdminProducts(Resource):
     @jwt_required
     def put(self):
         '''
-        Updates a product on the database
+        √ Updates a product on the database
         '''
         identity = get_jwt_identity()
         args = product_update_parser.parse_args()
@@ -100,7 +100,7 @@ class AdminProducts(Resource):
     @jwt_required
     def delete(self):
         '''
-        Deletes a product from the database
+        √ Deletes a product from the database
         '''
         identity = get_jwt_identity()
         args = product_delete_parser.parse_args()

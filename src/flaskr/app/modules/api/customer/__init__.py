@@ -30,7 +30,7 @@ customer_ns = Namespace(
 class GuestOptions(Resource):
     def post(self):
         '''
-        Creates guest account so guest can use a cart
+        √ Creates guest account so guest can use a cart
         '''
         return GuestPost()
 
@@ -47,20 +47,19 @@ class CustomerOptions(Resource):
     @jwt_required
     def post(self):
         '''
-        Creates a new account. 
+        √ Creates a new account. 
         Passes the old guest auth token as a parameter to modify the document in the database.
         This allows us to retain shipping and billing addresses that were previously assigned, and to retain the user's cart after they sign up.
         In reality it should only respond with the Authorization token
         '''
         value = get_jwt_identity()
-        print("What I knopw of this token is {}".format(value))
         args = add_account_parser.parse_args()
         return Post(args, value)
 
     @jwt_required
     def get(self):
         """
-        Returns the customer's visible data.
+        √ Returns the customer's visible data.
         Visible Data: First name, Last name, E-Mail, Phone Number, and various addresses. 
         Excludes information like password, TOS timestamp, account creation timestamp and cart id since they're unnecessary for our customer. 
         """
@@ -72,7 +71,7 @@ class CustomerOptions(Resource):
     @jwt_required
     def put(self):
         '''
-        When a guest wants to finish a purchase we get their information to be stored in their guest account. 
+        √ When a guest wants to finish a purchase we get their information to be stored in their guest account. 
         Also applies to customers wanting to update their personal information. 
         '''
         args = update_account_parser.parse_args()
@@ -89,33 +88,36 @@ class CustomerOptions(Resource):
 class CustomerBillingOptions(Resource):
     @customer_ns.response(200, 'Billing address succesfully added')
     @customer_ns.expect(add_billing_parser)
+    @jwt_required
     def post(self):
         '''
-        Creates new billing address
+        √ Creates new billing address
         '''
         args = add_billing_parser.parse_args()
-
-        return BillingPost(args)
+        identity = get_jwt_identity()
+        return BillingPost(args, identity)
 
     @customer_ns.response(200, 'Billing address succesfully updated')
     @customer_ns.expect(update_billing_parser)
+    @jwt_required
     def put(self):
         '''
-        Updates a billing address
+        NYI Updates a billing address
         '''
         args = update_billing_parser.parse_args()
-
-        return BillingPut(args)
+        identity = get_jwt_identity()
+        return BillingPut(args, identity)
 
     @customer_ns.response(200, 'Billing address successfully deleted')
     @customer_ns.expect(delete_billing_parser)
+    @jwt_required
     def delete(self):
         '''
-        Deletes one of the user's billing addresses
+        NYI Deletes one of the user's billing addresses
         '''
         args = delete_billing_parser.parse_args()
-
-        return BillingDelete(args)
+        identity = get_jwt_identity()
+        return BillingDelete(args, identity)
 
 
 #########################################################
@@ -127,27 +129,32 @@ class CustomerBillingOptions(Resource):
 class CustomerShippingOptions(Resource):
     @customer_ns.response(200, 'Shipping address succesfully created')
     @customer_ns.expect(add_shipping_parser)
+    @jwt_required
     def post(self):
         '''
-        Creates new shipping address
+        √ Creates new shipping address
         '''
         args = add_shipping_parser.parse_args()
-
-        return ShippingPost(args)
+        identity = get_jwt_identity()
+        return ShippingPost(args, identity)
 
     @customer_ns.response(200, 'Shipping address succesfully updated')
     @customer_ns.expect(update_shipping_parser)
+    @jwt_required
     def put(self):
         '''
-        Updates a shipping address
+        NYI Updates a shipping address
         '''
         args = update_shipping_parser.parse_args()
-        return ShippingPut(args)
+        identity = get_jwt_identity()
+        return ShippingPut(args, identity)
 
     @customer_ns.expect(delete_shipping_parser)
+    @jwt_required
     def delete(self):
         '''
-        Deletes one of the user's shipping addresses
+        NYI Deletes one of the user's shipping addresses
         '''
         args = delete_shipping_parser.parse_args()
-        return ShippingDelete(args)
+        identity = get_jwt_identity()
+        return ShippingDelete(args, identity)

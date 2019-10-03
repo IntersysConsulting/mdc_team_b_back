@@ -75,7 +75,8 @@ class UserOrder():
         else:
             # User can checkout this order
             order = self.make_order(cart, user_id)
-            response = self.db.create(self.collection_name, order)
+            response = 1 if self.db.create(self.collection_name,
+                                           order) != None else 0
 
         return response
 
