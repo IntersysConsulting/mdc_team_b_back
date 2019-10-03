@@ -59,12 +59,14 @@ class Cart(Resource):
     @any_ns.response(200, "Product was deleted successfully from the cart")
     @any_ns.response(400, "Product ID does not exist")
     @any_ns.expect(delete_item_parser)
+    @jwt_required
     def delete(self):
         '''
         Removes an item from the user's cart 
         '''
+        identity = get_jwt_identity()
         args = delete_item_parser.parse_args()
-        return Delete(args)
+        return Delete(args, identity)
 
 
 ################################### End Route
