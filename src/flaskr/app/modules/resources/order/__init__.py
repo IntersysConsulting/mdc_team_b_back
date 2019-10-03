@@ -6,6 +6,7 @@ from bson.objectid import ObjectId
 from ..cart import CartManager
 from ..product import UserProduct
 from ..customer import CustomerManager
+from .schema import OrderSchema
 # In this file we implement methods that serve as a middle point between the exposed endpoint and the
 # actual middleware.
 # Validate operation logic here, not permission to access it.
@@ -17,10 +18,12 @@ class UserOrder():
         self.db = Database()
         tmp_statuses = self.db.find_all("order_statuses", {})
         self.statuses = {}
+        self.value_to_status = {}
         for i in range(len(tmp_statuses)):
             key = tmp_statuses[i]["name"]
             value = str(tmp_statuses[i]["_id"])
             self.statuses[key] = value
+            self.value_to_status[value] = key
 
     def find_in_checkout_order(self, user_id):
         return self.db.find(
@@ -100,11 +103,14 @@ class UserOrder():
                     "$set": {
                         "billing_address": billing_address,
                         "shipping_address": shipping_address,
-                        "payment": payment
+                        "payment": payment,
+                        "status": ObjectId(self.statuses["Awaiting Payment"]),
+                        "timestamp": datetime.now()
                     }
                 })
 
         return response
+
 
     def cancel_checkout(self, user_id):
         order = self.find_in_checkout_order(user_id)
@@ -124,6 +130,21 @@ class UserOrder():
                               '$regex': r'^the-regex'
                           }}, sort, ascending, page)
         pass
+
+    def get_user_orders(self, user_id, filter, sort, ascending=True, page=0):
+        orders = self.db.find_all(self.collection_name,
+                                  {'customer_id': ObjectId(user_id)}, sort,
+                                  ascending, page)
+        response = []
+        for order in orders:
+            dumped_order = self.dump(order, exclude=["customer_id", "_id"])
+            dumped_order["status"] = self.value_to_status[
+                dumped_order["status"]]
+            response.append(dumped_order)
+        return response
+
+    def dump(self, data, exclude=[]):
+        return OrderSchema(exclude=exclude).dump(data).data
 
 
 class AdminOrder():
