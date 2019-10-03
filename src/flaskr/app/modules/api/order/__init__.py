@@ -30,7 +30,7 @@ class UserOrders(Resource):
     @user_ns.expect(user_order_get_parser)
     def get(self):
         '''
-        NYI Returns a sorted and filtered list of orders that the user has made
+        √ Returns a sorted and filtered list of orders that the user has made
         '''
         args = user_order_get_parser.parse_args()
         identity = get_jwt_identity()
@@ -58,7 +58,7 @@ class UserOrders(Resource):
     @jwt_required
     def put(self):
         '''
-        NYI Finishes an user's order by adding in billing, shipping and payment information after it was reviewed. 
+        √ Finishes an user's order by adding in billing, shipping and payment information after it was reviewed. 
         This should also clear up the user's cart. 
         '''
         args = user_order_update_parser.parse_args()

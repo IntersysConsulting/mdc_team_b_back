@@ -5,6 +5,7 @@ from flask_restplus.namespace import RequestParser
 from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 jwt_required, jwt_refresh_token_required,
                                 get_jwt_identity, get_raw_jwt)
+from datetime import timedelta
 
 #################
 # Parser        #
@@ -31,7 +32,8 @@ def Post(args):
     result, _id = am.login_admin(email, password)
 
     if result == 1:
-        access_token = create_access_token(identity=_id)
+        access_token = create_access_token(identity=_id,
+                                           expires_delta=timedelta(days=1))
         refresh_token = create_refresh_token(identity=_id)
 
         response = jsonify({

@@ -62,7 +62,7 @@ class Cart(Resource):
     @jwt_required
     def delete(self):
         '''
-        NYI Removes an item from the user's cart 
+        √ Removes an item from the user's cart 
         '''
         identity = get_jwt_identity()
         args = delete_item_parser.parse_args()
