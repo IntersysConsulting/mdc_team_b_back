@@ -21,7 +21,7 @@ Parser.add_argument(
     'payment',
     help='User payment provider information. Depends on the provider',
     required=True,
-    location='json')
+    location='form')
 #################
 # Method        #
 #################
