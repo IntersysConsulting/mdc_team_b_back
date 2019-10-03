@@ -102,7 +102,7 @@ class CustomerBillingOptions(Resource):
     @jwt_required
     def put(self):
         '''
-        NYI Updates a billing address
+        √ Updates a billing address
         '''
         args = update_billing_parser.parse_args()
         identity = get_jwt_identity()
@@ -143,7 +143,7 @@ class CustomerShippingOptions(Resource):
     @jwt_required
     def put(self):
         '''
-        NYI Updates a shipping address
+        √ Updates a shipping address
         '''
         args = update_shipping_parser.parse_args()
         identity = get_jwt_identity()
