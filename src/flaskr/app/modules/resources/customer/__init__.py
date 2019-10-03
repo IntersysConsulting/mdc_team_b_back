@@ -9,7 +9,7 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt_identity, jwt_required)
 from bson.objectid import ObjectId
 from ..validation import is_guest, is_customer, is_customer_email_available
-
+from copy import deepcopy
 
 class CustomerManager():
     def __init__(self):
@@ -20,6 +20,8 @@ class CustomerManager():
         new_user = {"is_guest": True}
         result = self.db.create(self.collection_name, new_user)
         return result
+
+    #region Customer Data
 
     def create_new_customer(self, _id, first_name, last_name, email, password,
                             phone):
@@ -141,6 +143,9 @@ class CustomerManager():
                                       {"_id": ObjectId(_id)}),
                          only_personal=True)
 
+    #endregion
+
+    #region Generic Address
     def add_address(self, user_id, array, new_address, is_default):
         #expects billing_addresses or shipping_addresses on array
         customer = self.db.find(self.collection_name,
@@ -150,10 +155,10 @@ class CustomerManager():
             #Customer does not exist
             response = -1
         else:
-                
-            if  array in customer.keys():
+
+            if array in customer.keys():
                 addresses = [x for x in customer[array]]
-            else: 
+            else:
                 addresses = []
 
             if new_address in addresses:
@@ -184,24 +189,79 @@ class CustomerManager():
                                               array: new_address
                                           }})
         return response
+    def make_address(self, address, between, country, state, city, zip_code,
+                     first_name, last_name, delivery_notes):
+        new_fields = {}
+        if address:
+            new_fields["address"] = address
+        if between:
+            new_fields["between"] = between
+        if country:
+            new_fields["country"] = country
+        if state:
+            new_fields["state"] = state
+        if city:
+            new_fields["city"] = city
+        if zip_code:
+            new_fields["zip_code"] = zip_code
+        if first_name:
+            new_fields["first_name"] = first_name
+        if last_name:
+            new_fields["last_name"] = last_name
+        if delivery_notes:
+            new_fields["delivery_notes"] = delivery_notes
+        return new_fields
+    def update_address(self, user_id, array, new_fields, index, is_default):
+        '''
+        Updates an address generically.
+        Returns 1 on Success, 0 on Failure, -1 On Not a customer, -2 on IndexOutOfArrayRange 
+        '''
+        customer = self.get_data(user_id)
+        if customer == None:
+            # Customer does not exist
+            can_update = False
+            response = -1
+        else:
+            addresses = customer[array]            
+            if(index>len(addresses)-1):
+                # Index out of range
+                response = -2
+            else:
+                if is_default and not index == 0:
+                    # Swaps out the updated address with 0 (is_default) and sets to update on 0
+                    # Deepcopy Allows us to copy actual objects instead of references. If you don't do this then both objects will be changed.
+                    tmp_address = deepcopy(addresses[0])
+                    addresses[0] = deepcopy(addresses[index])
+                    addresses[index] = tmp_address
+                    index_to_update = 0
+                else:  #is_default == False or  ( index == 0 and is_default == True )
+                    # The address can be changed directly
+                    index_to_update = index
+
+                # Checks every field to be updated
+                for key in new_fields.keys():
+                    addresses[index_to_update][key] = new_fields[key]
+
+                response = self.db.update(self.collection_name, {"_id":ObjectId(user_id)}, {"$set":{array:addresses}})
+
+        return response
+    #endregion
 
     def add_billing(self, user_id, address, country, state, city, zip_code,
                     first_name, last_name, is_default):
 
-        new_address = {
-            "address": address,
-            "country": country,
-            "state": state,
-            "city": city,
-            "zip_code": zip_code,
-            "first_name": first_name,
-            "last_name": last_name
-        }
+        new_address = self.make_address(address, None, country, state, city,
+                                   zip_code, first_name, last_name,
+                                   None)
         return self.add_address(user_id, "billing_addresses", new_address,
                                 is_default)
 
-    def update_billing(self, user_id, billing_obj_id, billing_obj):
-        pass
+    def update_billing(self, user_id, index, address, country, state, city,
+                       zip_code, first_name, last_name, is_default):
+        new_fields = self.make_address(address, None, country, state, city,
+                                       zip_code, first_name, last_name, None)
+        return self.update_address(user_id, "billing_addresses", new_fields, index, is_default)
+
 
     def delete_billing(self, user_id, billing_obj_id):
         pass
@@ -209,21 +269,17 @@ class CustomerManager():
     def add_shipping(self, user_id, address, between, country, state, city,
                      zip_code, first_name, last_name, delivery_notes,
                      is_default):
-        new_address = {
-            "address": address,
-            "between": between,
-            "country": country,
-            "state": state,
-            "city": city,
-            "zip_code": zip_code,
-            "first_name": first_name,
-            "last_name": last_name,
-            "delivery_notes": delivery_notes
-        }
+
+        new_address = make_address(address, between, country, state, city,
+                                   zip_code, first_name, last_name,
+                                   delivery_notes)
         return self.add_address(user_id, "shipping_addresses", new_address,
                                 is_default)
 
-    def update_shipping(self, user_id, shipping_obj_id, shipping_obj):
+
+
+
+    def update_shipping(self, user_id, billing_obj_id, billing_obj):
         pass
 
     def delete_shipping(self, user, shipping_obj_id):
