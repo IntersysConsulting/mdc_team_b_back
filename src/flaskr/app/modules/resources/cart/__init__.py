@@ -2,7 +2,7 @@ from ...db import Database
 from bson.objectid import ObjectId
 from datetime import datetime
 from .schema import CartSchema
-
+from ...resources import product
 
 class CartManager():
     def __init__(self):
@@ -74,3 +74,46 @@ class CartManager():
     def get_cart(self, user):
         return CartSchema(exclude=['_id', 'user']).dump(
             self.db.find(self.collection_name, {"user": ObjectId(user)})).data
+
+    def delete_cart(self, user, pid, cart):
+        '''
+        In this case result will be:
+            -1 unexpected error
+            0 if the product was not in the cart
+            1 if the item could be erased from the cart
+            2 if the product did not exist
+        '''
+        result = 0 
+        us = product.UserProduct()  
+        
+        cart_id = self.db.find(self.collection_name,
+                            {"user": ObjectId(user)})['_id']
+
+        #self.db.delete(self.collection_name, {"user": ObjectId(user)})
+
+        if not us.GetOne(pid) :
+            result = 2
+        else:
+            try:
+                products = [str(x['product']) for x in cart['products']]
+                index_to_insert_on = products.index(pid)
+                command = "$pull"
+                where = "products"
+
+                print(index_to_insert_on)
+
+                result = self.db.update(self.collection_name,
+                                {"_id": ObjectId(cart_id)}, {
+                                    command: {
+                                        where: {
+                                            "product": ObjectId(pid)
+                                        }
+                                    }
+                                })
+
+            
+            except:
+                print('There is no product {} in the cart'.format(pid))
+                result = 0 
+
+        return result
