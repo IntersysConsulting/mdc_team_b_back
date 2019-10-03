@@ -13,13 +13,13 @@ class UserProduct():
         self.collection_name = "products"
         self.db = Database()
 
-    def GetOne(self, id):
+    def get_one(self, id):
         return self.dump(self.db.find(self.collection_name, {"_id": ObjectId(id)}))
 
     # def GetAll(self):
     #     pass
 
-    def GetProducts(self, filter, sort, ascending=True, page=0, page_size=None):
+    def get_products(self, filter, sort, ascending=True, page=0, page_size=None):
         output = []
         selector = {'name': {'$regex': r''}}
 

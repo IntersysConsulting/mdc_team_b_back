@@ -2,7 +2,7 @@ from ...db import Database
 from bson.objectid import ObjectId
 from datetime import datetime
 from .schema import CartSchema
-from ...resources import product
+from ...resources.product import UserProduct
 
 class CartManager():
     def __init__(self):
@@ -84,14 +84,14 @@ class CartManager():
             2 if the product did not exist
         '''
         result = 0 
-        us = product.UserProduct()  
+        us = UserProduct()  
         
         cart_id = self.db.find(self.collection_name,
                             {"user": ObjectId(user)})['_id']
 
         #self.db.delete(self.collection_name, {"user": ObjectId(user)})
 
-        if not us.GetOne(pid) :
+        if not us.get_one(pid) :
             result = 2
         else:
             try:
@@ -117,3 +117,15 @@ class CartManager():
                 result = 0 
 
         return result
+
+    def empty_cart(self, customer_id):
+        '''
+        Empties the customer's cart after doing a purchase
+        '''
+        cart = self.db.find(self.collection_name, {"user":ObjectId(customer_id)})
+        if cart != None:
+            response = self.db.update(self.collection_name, {"user":ObjectId(customer_id)}, {"$set":{"products":[]}})
+        else:
+            # User does not have a cart
+            response = -1
+        return response

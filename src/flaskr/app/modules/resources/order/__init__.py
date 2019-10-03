@@ -48,7 +48,7 @@ class UserOrder():
         #   products_in_order = Output list of all the order_product variant of products
 
         for cart_product in products_in_cart:
-            db_product = up.GetOne(cart_product["product"])
+            db_product = up.get_one(cart_product["product"])
             # This is an instance of a product in the order
             order_product = {
                 "name": db_product["name"],
@@ -98,7 +98,7 @@ class UserOrder():
             customer = cm.get_data(user_id)
             billing_address = customer["billing_addresses"][billing]
             shipping_address = customer["shipping_addresses"][shipping]
-            response = self.db.update(
+            update_result = self.db.update(
                 self.collection_name, {"_id": order["_id"]}, {
                     "$set": {
                         "billing_address": billing_address,
@@ -108,7 +108,26 @@ class UserOrder():
                         "timestamp": datetime.now()
                     }
                 })
-
+            cart_m = CartManager()
+            if update_result == 1:
+                # We could update the order, now we try to empty the cart
+                empty_result = cart_m.empty_cart(user_id)
+                if empty_result == 1:
+                    # Cart was emptied properly
+                    response = 1
+                elif empty_result == 0:
+                    # Could not empty the cart (Partial success)
+                    response = 2
+                elif empty_result == -1:
+                    # User did not have a cart (This should never happen)
+                    response = -3
+                else:
+                    # Unexpected value (This should never happen)
+                    response = -4
+            else:
+                # We could not update the order
+                response = 0
+                        
         return response
 
 
