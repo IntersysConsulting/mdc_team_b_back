@@ -11,6 +11,7 @@ from bson.objectid import ObjectId
 from ..validation import is_guest, is_customer, is_customer_email_available
 from copy import deepcopy
 
+
 class CustomerManager():
     def __init__(self):
         self.collection_name = "customers"
@@ -189,6 +190,7 @@ class CustomerManager():
                                               array: new_address
                                           }})
         return response
+
     def make_address(self, address, between, country, state, city, zip_code,
                      first_name, last_name, delivery_notes):
         new_fields = {}
@@ -211,6 +213,7 @@ class CustomerManager():
         if delivery_notes:
             new_fields["delivery_notes"] = delivery_notes
         return new_fields
+
     def update_address(self, user_id, array, new_fields, index, is_default):
         '''
         Updates an address generically.
@@ -223,7 +226,7 @@ class CustomerManager():
             response = -1
         else:
             addresses = customer[array]
-            if(index>len(addresses)-1):
+            if (index > len(addresses) - 1):
                 # Index out of range
                 response = -2
             else:
@@ -242,17 +245,52 @@ class CustomerManager():
                 for key in new_fields.keys():
                     addresses[index_to_update][key] = new_fields[key]
 
-                response = self.db.update(self.collection_name, {"_id":ObjectId(user_id)}, {"$set":{array:addresses}})
+                response = self.db.update(self.collection_name,
+                                          {"_id": ObjectId(user_id)},
+                                          {"$set": {
+                                              array: addresses
+                                          }})
 
         return response
+
+    def delete_address(self, user_id, array, index):
+        '''        
+        Deletes an address generically.
+        Returns 1 on Success, 0 on Failure, -1 On Not a customer, -2 on IndexOutOfArrayRange 
+        '''
+        customer = self.get_data(user_id)
+        if customer == None:
+            # Customer does not exist
+            can_update = False
+            response = -1
+        else:
+            addresses = customer[array]
+            if (index > len(addresses) - 1):
+                # Index out of range
+                response = -2
+            else:
+                # We can delete, but mongodb doesn't have a way to delete by index, so we...
+                # Set null/None to the value with $unset
+                self.db.update(self.collection_name,
+                               {"_id": ObjectId(user_id)},
+                               {"$unset": {
+                                   "{}.{}".format(array, index): 1
+                               }})
+                # Then we remove it with $pull
+                response = self.db.update(self.collection_name,
+                                          {"_id": ObjectId(user_id)},
+                                          {"$pull": {
+                                              array: None
+                                          }})
+        return response
+
     #endregion
 
     def add_billing(self, user_id, address, country, state, city, zip_code,
                     first_name, last_name, is_default):
 
         new_address = self.make_address(address, None, country, state, city,
-                                   zip_code, first_name, last_name,
-                                   None)
+                                        zip_code, first_name, last_name, None)
         return self.add_address(user_id, "billing_addresses", new_address,
                                 is_default)
 
@@ -260,35 +298,33 @@ class CustomerManager():
                        zip_code, first_name, last_name, is_default):
         new_fields = self.make_address(address, None, country, state, city,
                                        zip_code, first_name, last_name, None)
-        return self.update_address(user_id, "billing_addresses", new_fields, index, is_default)
+        return self.update_address(user_id, "billing_addresses", new_fields,
+                                   index, is_default)
 
-
-    def delete_billing(self, user_id, billing_obj_id):
-        pass
+    def delete_billing(self, user_id, index):
+        return self.delete_address(user_id, "billing_addresses", index)
 
     def add_shipping(self, user_id, address, between, country, state, city,
                      zip_code, first_name, last_name, delivery_notes,
                      is_default):
 
         new_address = self.make_address(address, between, country, state, city,
-                                   zip_code, first_name, last_name,
-                                   delivery_notes)
+                                        zip_code, first_name, last_name,
+                                        delivery_notes)
         return self.add_address(user_id, "shipping_addresses", new_address,
                                 is_default)
 
-
-
-
-    def update_shipping(self, user_id, index, address, between, country, state, city,
-                     zip_code, first_name, last_name, delivery_notes,
-                     is_default):
+    def update_shipping(self, user_id, index, address, between, country, state,
+                        city, zip_code, first_name, last_name, delivery_notes,
+                        is_default):
         new_fields = self.make_address(address, between, country, state, city,
-                                       zip_code, first_name, last_name, delivery_notes)
+                                       zip_code, first_name, last_name,
+                                       delivery_notes)
         return self.update_address(user_id, "shipping_addresses", new_fields,
                                    index, is_default)
 
-    def delete_shipping(self, user, shipping_obj_id):
-        pass
+    def delete_shipping(self, user_id, index):
+        return self.delete_address(user_id, "shipping_addresses", index)
 
     def dump(self, data, only_personal=False):
         _personal_data_exclusion = [
