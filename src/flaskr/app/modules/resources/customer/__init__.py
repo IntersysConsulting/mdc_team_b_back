@@ -268,13 +268,22 @@ class CustomerManager():
             if (index > len(addresses) - 1):
                 # Index out of range
                 response = -2
-            else: 
-                # We can delete, but mongodb doesn't have a way to delete by index, so we... 
+            else:
+                # We can delete, but mongodb doesn't have a way to delete by index, so we...
                 # Set null/None to the value with $unset
-                self.db.update(self.collection_name, {"_id":ObjectId(user_id)},{"$unset":{"{}.{}".format(array, index):1}})
+                self.db.update(self.collection_name,
+                               {"_id": ObjectId(user_id)},
+                               {"$unset": {
+                                   "{}.{}".format(array, index): 1
+                               }})
                 # Then we remove it with $pull
-                response = self.db.update(self.collection_name, {"_id":ObjectId(user_id)},{"$pull":{array:None}})
+                response = self.db.update(self.collection_name,
+                                          {"_id": ObjectId(user_id)},
+                                          {"$pull": {
+                                              array: None
+                                          }})
         return response
+
     #endregion
 
     def add_billing(self, user_id, address, country, state, city, zip_code,
@@ -300,24 +309,22 @@ class CustomerManager():
                      is_default):
 
         new_address = self.make_address(address, between, country, state, city,
-                                   zip_code, first_name, last_name,
-                                   delivery_notes)
+                                        zip_code, first_name, last_name,
+                                        delivery_notes)
         return self.add_address(user_id, "shipping_addresses", new_address,
                                 is_default)
 
-
-
-
-    def update_shipping(self, user_id, index, address, between, country, state, city,
-                     zip_code, first_name, last_name, delivery_notes,
-                     is_default):
+    def update_shipping(self, user_id, index, address, between, country, state,
+                        city, zip_code, first_name, last_name, delivery_notes,
+                        is_default):
         new_fields = self.make_address(address, between, country, state, city,
-                                       zip_code, first_name, last_name, delivery_notes)
+                                       zip_code, first_name, last_name,
+                                       delivery_notes)
         return self.update_address(user_id, "shipping_addresses", new_fields,
                                    index, is_default)
 
-    def delete_shipping(self, user, shipping_obj_id):
-        pass
+    def delete_shipping(self, user_id, index):
+        return self.delete_address(user_id, "shipping_addresses", index)
 
     def dump(self, data, only_personal=False):
         _personal_data_exclusion = [
