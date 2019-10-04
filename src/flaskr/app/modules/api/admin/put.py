@@ -13,11 +13,11 @@ Parser.add_argument('current_password',
                     location='form')
 Parser.add_argument('first_name',
                     help='First name of the admin',
-                    required=True,
+                    required=False,
                     location='form')
 Parser.add_argument('last_name',
                     help='Last name of the admin',
-                    required=True,
+                    required=False,
                     location='form')
 Parser.add_argument('new_password',
                     help='Password that will replace the current one',
@@ -39,11 +39,36 @@ def Put(args, identity):
         new_password = None if not args["new_password"] else args[
             "new_password"]
         am = AdminManagement()
-        #Implement the method here
-
-        response = jsonify({
-            "statusCode": 500,
-            "message": "Not yet implemented"
-        })
+        result = am.update_admin(identity, first_name, last_name, new_password,
+                                 password)
+        if result == -2:
+            response = jsonify({
+                "statusCode":
+                403,
+                "message":
+                "Old password does not match. Can't update."
+            })
+        elif result == -1:
+            response = jsonify({
+                "statusCode": 400,
+                "message": "User does not exist."
+            })
+        elif result == 0:
+            response = jsonify({
+                "statusCode": 500,
+                "message": "Could not update."
+            })
+        elif result == 1:
+            response = jsonify({
+                "statusCode": 200,
+                "message": "Succesfully updated the admin."
+            })
+        else:
+            response = jsonify({
+                "statusCode":
+                500,
+                "message":
+                "Unexpected result={}.".format(result)
+            })
 
     return response

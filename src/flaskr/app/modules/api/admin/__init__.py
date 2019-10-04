@@ -12,6 +12,7 @@ from .reset.post import Post as ResetPost, Parser as request_password_parser
 from flask_jwt_extended import (get_jwt_identity, jwt_required)
 from ...auth import authorizations
 
+
 admin_ns = Namespace(
     "admin/management",
     authorizations=authorizations,
@@ -48,10 +49,11 @@ class Admin(Resource):
     @jwt_required
     def put(self):
         '''
-        NYI Updates the issuing admin's information
+        √ Updates the issuing admin's information
         '''
+        args = update_admin_parser.parse_args()
         identity = get_jwt_identity()
-        return Put(request.json, identity)
+        return Put(args, identity)
 
     @admin_ns.response(200, 'Admin was sucessfully deleted')
     @admin_ns.expect(delete_admin_parser)
