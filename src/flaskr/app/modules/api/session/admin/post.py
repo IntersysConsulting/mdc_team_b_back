@@ -29,18 +29,24 @@ def Post(args):
     password = args['password']
 
     am = AdminManagement()
-    result, _id = am.login_admin(email, password)
+    result, admin = am.login_admin(email, password)
 
     if result == 1:
-        access_token = create_access_token(identity=_id,
+        access_token = create_access_token(identity=admin["_id"],
                                            expires_delta=timedelta(days=1))
-        refresh_token = create_refresh_token(identity=_id)
+        refresh_token = create_refresh_token(identity=admin["_id"])
 
         response = jsonify({
-            "statusCode": 200,
-            "message": "Welcome admin",
-            "access_token": access_token,
-            "refresh_token": refresh_token,
+            "statusCode":
+            200,
+            "message":
+            "Welcome admin",
+            "access_token":
+            access_token,
+            "refresh_token":
+            refresh_token,
+            "admin_name":
+            "{} {}".format(admin["first_name"], admin["last_name"])
         })
     elif result == 0:
         response = jsonify({"statusCode": 400, "message": "Wrong password"})

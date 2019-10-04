@@ -86,7 +86,7 @@ class CustomerManager():
             response = (-1, None)
         else:
             customer = self.dump(result)
-            response = (1, customer["_id"]) if verify_hash(
+            response = (1, customer) if verify_hash(
                 password, customer["password"]) else (0, None)
 
         return response

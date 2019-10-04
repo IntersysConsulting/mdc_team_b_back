@@ -33,7 +33,7 @@ class AdminManagement:
 
         else:
             admin = self.dump(result)
-            response = (1, admin["_id"]) if verify_hash(
+            response = (1, admin) if verify_hash(
                 password, admin["password"]) else (0, None)
 
         return response
