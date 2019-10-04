@@ -143,13 +143,6 @@ class UserOrder():
             response = 0
         return response
 
-    def GetUserOrders(self, user_id, filter, sort, ascending=True, page=0):
-        Database.find_all(self.collection_name,
-                          {'field': {
-                              '$regex': r'^the-regex'
-                          }}, sort, ascending, page)
-        pass
-
     def get_user_orders(self, user_id, filter, sort, ascending=True, page=0):
         orders = self.db.find_all(self.collection_name,
                                   {'customer_id': ObjectId(user_id)}, sort,
