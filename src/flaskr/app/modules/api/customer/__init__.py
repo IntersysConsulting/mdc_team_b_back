@@ -113,7 +113,7 @@ class CustomerBillingOptions(Resource):
     @jwt_required
     def delete(self):
         '''
-        NYI Deletes one of the user's billing addresses
+        √ Deletes one of the user's billing addresses
         '''
         args = delete_billing_parser.parse_args()
         identity = get_jwt_identity()
@@ -153,7 +153,7 @@ class CustomerShippingOptions(Resource):
     @jwt_required
     def delete(self):
         '''
-        NYI Deletes one of the user's shipping addresses
+        √ Deletes one of the user's shipping addresses
         '''
         args = delete_shipping_parser.parse_args()
         identity = get_jwt_identity()
