@@ -1,6 +1,10 @@
-from flask import Blueprint
+from flask import Blueprint, jsonify
 from flask_restplus import Api, Namespace, Resource
 from flask_cors import CORS
+
+import jwt
+import flask_jwt_extended
+
 # When you finish your class, add it under this one.
 from .product import any_ns as product_any, admin_ns as product_admin
 from .order import user_ns as order_user, admin_ns as order_admin
@@ -21,6 +25,29 @@ api = Api(v1_blueprint,
           version="1.0",
           title="eCommerce API",
           description="Bundle of API that feed the eCommerce website")
+
+#Handlers for jwt exceptions
+
+@api.errorhandler(jwt.ExpiredSignatureError)
+def handle_validation_signature(error):
+    return jsonify({
+            "statusCode": 401,
+            "message": "Invalid or missing credentials",
+            "data": {
+                "Auth": error.message
+            }
+        })
+
+@api.errorhandler(flask_jwt_extended.exceptions.NoAuthorizationError)
+def handle_validation_error(error):
+    return jsonify({
+            "statusCode": 401,
+            "message": "Invalid or missing credentials",
+            "data": {
+                "Auth": error.message
+            }
+        })
+
 # After you import your namespaces, import them into the API
 
 # Please load these in alphabetical order for Swagger

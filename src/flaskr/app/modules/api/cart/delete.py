@@ -51,8 +51,6 @@ def Delete(args, identity):
                     "Product does not exist."
                 })
 
-                
-
     except ExpiredSignatureError:
         response = jsonify({
             "statusCode": 401,
