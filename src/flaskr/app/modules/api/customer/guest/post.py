@@ -2,7 +2,7 @@ from flask import jsonify
 from flask_restplus.namespace import RequestParser
 from ....resources.customer import CustomerManager
 from flask_jwt_extended import create_access_token, create_refresh_token
-
+from datetime import timedelta
 #################
 # Parser        #
 #################
@@ -21,7 +21,8 @@ def Post():
 
     if insert_result.acknowledged:
         _id = str(insert_result.inserted_id)
-        access_token = create_access_token(identity=_id)
+        access_token = create_access_token(identity=_id,
+                                           expires_delta=timedelta(days=1))
         refresh_token = create_refresh_token(identity=_id)
 
         response = jsonify({
