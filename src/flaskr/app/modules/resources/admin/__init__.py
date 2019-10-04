@@ -7,6 +7,7 @@ from flask_jwt_extended import (create_access_token, create_refresh_token)
 from pymongo import errors
 import random
 from ..mail.reset_password import send_reset_password_email
+from bson.objectid import ObjectId
 
 
 class AdminManagement:
@@ -70,16 +71,12 @@ class AdminManagement:
             result = -1
         return result
 
-    def delete_admin(self, id, email=None):
+    def delete_admin(self, id):
         # If the parameter email field is not blank then it tries to delete by email. Otherwise it will look up by _id
-        admin = self.db.delete(self.collection_name, ({
-            "email": email
-        })) if not email == None else self.db.delete(self.collection_name,
+        return self.db.delete(self.collection_name,
                                                      ({
-                                                         "_id": id
+                                                         "_id": ObjectId(id)
                                                      }))
-        print(self.dump(admin))
-        return self.dump(admin)
 
     def update_admin(self, id, name, password, comment=""):
         pass
@@ -173,5 +170,6 @@ class AdminManagement:
 
         return response
 
-    def dump(self, data):
-        return AdminSchema().dump(data).data
+
+    def dump(self, data, exclude=[]):
+        return AdminSchema(exclude=exclude).dump(data).data
