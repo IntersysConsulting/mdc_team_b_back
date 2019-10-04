@@ -42,8 +42,45 @@ class AdminManagement:
         admin = self.db.find(self.collection_name, {"email": email})
         return self.dump(admin)
 
-    def get_all_admins(self):
-        pass
+    def get_all_admins(self, sort, page, page_size, field, value):
+        query = None
+        if field == None:
+            query = {}
+        else:
+            field = field.lower()
+            if field == "email":
+                # Check for email
+                query = {"email": {'$regex': value}}
+            elif field == "name":
+                query = {
+                    "$or": [{
+                        "first_name": {
+                            '$regex': value
+                        }
+                    }, {
+                        "last_name": {
+                            '$regex': value
+                        }
+                    }]
+                }
+                # Check for name
+            else:
+                # Invalid field
+                response = -1, 0
+
+        if not query == None:
+            list_of_admins = self.db.find_all(self.collection_name,
+                                              query,
+                                              next_page=page, page_size=page_size)
+            total_admins = self.db.get_count(self.collection_name, query)
+            admins = []
+            for admin in list_of_admins:
+                admins.append(
+                    self.dump(admin,
+                              exclude=["password", "reset_token.access_code"]))
+            response = admins, total_admins
+
+        return response
 
     def create_admin(self, first_name, last_name, email):
         try:
@@ -173,5 +210,5 @@ class AdminManagement:
 
         return response
 
-    def dump(self, data):
-        return AdminSchema().dump(data).data
+    def dump(self, data, exclude=[]):
+        return AdminSchema(exclude=exclude).dump(data).data
