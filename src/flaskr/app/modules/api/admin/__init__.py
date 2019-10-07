@@ -1,5 +1,4 @@
 from flask import jsonify
-from flask import Blueprint, request
 from flask_restplus import Resource, fields, Namespace
 from ...resources.admin import AdminManagement
 # from werkzeug.datastructures import FileStorage
@@ -11,7 +10,6 @@ from .reset.put import Put as ResetPut, Parser as reset_password_parser
 from .reset.post import Post as ResetPost, Parser as request_password_parser
 from flask_jwt_extended import (get_jwt_identity, jwt_required)
 from ...auth import authorizations
-
 
 admin_ns = Namespace(
     "admin/management",

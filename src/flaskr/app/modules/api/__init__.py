@@ -10,6 +10,7 @@ from .product import any_ns as product_any, admin_ns as product_admin
 from .order import user_ns as order_user, admin_ns as order_admin
 from .cart import any_ns as cart_any
 from .customer import customer_ns as customer_user
+from .identity import identity_ns as identity_user
 from .admin import admin_ns as management_admin
 from .session import customer_ns as session_customer, admin_ns as session_admin
 from ..auth import authorizations
@@ -28,25 +29,28 @@ api = Api(v1_blueprint,
 
 #Handlers for jwt exceptions
 
+
 @api.errorhandler(jwt.ExpiredSignatureError)
 def handle_validation_signature(error):
     return jsonify({
-            "statusCode": 401,
-            "message": "Invalid or missing credentials",
-            "data": {
-                "Auth": error.message
-            }
-        })
+        "statusCode": 401,
+        "message": "Invalid or missing credentials",
+        "data": {
+            "Auth": error.message
+        }
+    })
+
 
 @api.errorhandler(flask_jwt_extended.exceptions.NoAuthorizationError)
 def handle_validation_error(error):
     return jsonify({
-            "statusCode": 401,
-            "message": "Invalid or missing credentials",
-            "data": {
-                "Auth": error.message
-            }
-        })
+        "statusCode": 401,
+        "message": "Invalid or missing credentials",
+        "data": {
+            "Auth": error.message
+        }
+    })
+
 
 # After you import your namespaces, import them into the API
 
@@ -57,6 +61,7 @@ def handle_validation_error(error):
 ###################################
 api.add_namespace(cart_any)
 api.add_namespace(customer_user)
+api.add_namespace(identity_user)
 api.add_namespace(order_user)
 api.add_namespace(product_any)
 api.add_namespace(session_customer)
