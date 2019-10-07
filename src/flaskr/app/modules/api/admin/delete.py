@@ -26,7 +26,7 @@ def Delete(args, identity):
         print("{} == {} ? ".format(identity, admin_id))
         if identity == admin_id:
             response = jsonify({
-                "statusCode": 400,
+                "statusCode": 406,
                 "message": "Admin can not delete itself."
             })
         else:
