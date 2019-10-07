@@ -69,7 +69,7 @@ class UserOrders(Resource):
     @jwt_required
     def delete(self):
         '''
-        NYI Deletes the user's "In Checkout" order. This happens if the user backs-down from checkout. 
+        √ Deletes the user's "In Checkout" order. This happens if the user backs-down from checkout. 
         '''
         args = user_order_delete_parser.parse_args()
         identity = get_jwt_identity()

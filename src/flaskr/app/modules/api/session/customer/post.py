@@ -29,17 +29,18 @@ def Post(args):
     print("The user {} is trying to log in.".format(email))
     cm = CustomerManager()
 
-    result, _id = cm.login(email, password)
+    result, customer = cm.login(email, password)
 
     if result == 1:
-        access_token = create_access_token(identity=_id, expires_delta=timedelta(days=1))
-        refresh_token = create_refresh_token(identity=_id)
+        access_token = create_access_token(identity=customer["_id"], expires_delta=timedelta(days=1))
+        refresh_token = create_refresh_token(identity=customer["_id"])
 
         response = jsonify({
             "statusCode": 200,
             "message": "Welcome customer",
             "access_token": access_token,
             "refresh_token": refresh_token,
+            "customer_name": "{} {}".format(customer["first_name"], customer["last_name"])
         })
     elif result == 0:
         response = jsonify({"statusCode": 400, "message": "Wrong password"})

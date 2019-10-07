@@ -72,8 +72,25 @@ class CartManager():
         return total, unique
 
     def get_cart(self, user):
-        return CartSchema(exclude=['_id', 'user']).dump(
-            self.db.find(self.collection_name, {"user": ObjectId(user)})).data
+        up = UserProduct()
+        cart = CartSchema(exclude=['_id', 'user']).dump(
+            self.db.find(self.collection_name, {"user": ObjectId(user)})).data 
+
+        product_list = []         
+        for product in cart['products']:
+            print("Product = {}".format(product))
+            _product =  up.get_one(product["product"])
+            product_list.append({
+                "_id":_product["_id"], 
+                "price":_product["price"], 
+                "image":_product["img"], 
+                "name":_product["name"], 
+                "quantity":product["quantity"]
+            })
+
+        cart["products"] = product_list
+        print("The cart is {}".format(cart))
+        return cart
 
     def delete_cart(self, user, pid, cart):
         '''
@@ -83,9 +100,9 @@ class CartManager():
             1 if the item could be erased from the cart
             2 if the product did not exist
         '''
-        result = 0 
-        us = UserProduct()  
-        
+        result = 0
+        us = UserProduct()
+
         cart_id = self.db.find(self.collection_name,
                             {"user": ObjectId(user)})['_id']
 
@@ -111,10 +128,10 @@ class CartManager():
                                     }
                                 })
 
-            
+
             except:
                 print('There is no product {} in the cart'.format(pid))
-                result = 0 
+                result = 0
 
         return result
 

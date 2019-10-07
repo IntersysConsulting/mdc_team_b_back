@@ -26,7 +26,7 @@ class Admin(Resource):
     @jwt_required
     def get(self):
         '''
-        NYI Returns currently registered admins. May be sorted A-Z, Z-A, oldest first, newest first.
+        √ Returns currently registered admins. May be sorted A-Z, Z-A, oldest first, newest first.
         '''
         args = get_admin_parser.parse_args()
         identity = get_jwt_identity()
