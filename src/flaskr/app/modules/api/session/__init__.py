@@ -42,7 +42,7 @@ class CustomerSession(Resource):
     @customer_ns.expect(customer_logout_parser)
     def delete(self):
         '''
-        NYI Allows the customer to log out of their current session
+        √ Allows the customer to log out of their current session
         '''
         args = customer_logout_parser.parse_args()
         return CustomerDelete(args)
@@ -71,7 +71,7 @@ class AdminSession(Resource):
     @admin_ns.expect(admin_logout_parser)
     def delete(self):
         '''
-        NYI Allows the admin to log out of their current session
+        √ Allows the admin to log out of their current session
         '''
         args = admin_logout_parser.parse_args()
         return AdminDelete(args)
