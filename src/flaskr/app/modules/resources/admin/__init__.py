@@ -115,15 +115,26 @@ class AdminManagement:
                                                          "_id": ObjectId(id)
                                                      }))
 
-    def update_admin(self, id, name, password, comment=""):
-        pass
-
-    def update_password(self, email, new_password):
-        # updated = self.db.update({email:email}, {$set: {password: new_password}})
-
-        new_password = {"$set": {"password": new_password}}
-        email = {"first_name": email}
-        updated = self.db.update(self.collection_name, email, new_password)
+    def update_admin(self, id, first_name, last_name, password, old_password):
+        update_fields = {}
+        admin = self.db.find(self.collection_name, {"_id": ObjectId(id)})
+        if admin == None:
+            # Admin does not exist
+            response = -1
+        elif not verify_hash(old_password, admin["password"]):
+            # Password doesn't match
+            response = -2
+        else:
+            if first_name:
+                update_fields["first_name"] = first_name
+            if last_name:
+                update_fields["last_name"] = last_name
+            if password:
+                update_fields["password"] = hash_password(password)
+            response = self.db.update(self.collection_name,
+                                      {"_id": ObjectId(id)},
+                                      {"$set": update_fields})
+        return response
 
     def request_reset(self, email):
         user = self.db.find(self.collection_name, {"email": email})
