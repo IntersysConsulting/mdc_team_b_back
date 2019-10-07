@@ -14,7 +14,7 @@ class Identity(Resource):
     @jwt_required
     def get(self):
         '''
-        Returns "Guest", "Customer" or "Admin" depending on the user's JWT token. 
+        √ Returns "Guest", "Customer" or "Admin" depending on the user's JWT token. 
         '''
         identity = get_jwt_identity()
         return Get(identity)

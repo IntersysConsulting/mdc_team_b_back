@@ -58,7 +58,7 @@ class Admin(Resource):
     @jwt_required
     def delete(self):
         '''
-        NYI Deletes an admin from the database
+        √ Deletes an admin from the database
         '''
         args = delete_admin_parser.parse_args()
         identity = get_jwt_identity()
