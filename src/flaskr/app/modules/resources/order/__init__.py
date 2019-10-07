@@ -48,7 +48,8 @@ class UserOrder():
         #   products_in_order = Output list of all the order_product variant of products
 
         for cart_product in products_in_cart:
-            db_product = up.get_one(cart_product["product"])
+            print("Cart product = {}".format(cart_product))
+            db_product = up.get_one(cart_product["_id"])
             # This is an instance of a product in the order
             order_product = {
                 "name": db_product["name"],
