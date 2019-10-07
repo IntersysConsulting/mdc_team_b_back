@@ -7,6 +7,7 @@ from flask_jwt_extended import (create_access_token, create_refresh_token)
 from pymongo import errors
 import random
 from ..mail.reset_password import send_reset_password_email
+from bson.objectid import ObjectId
 
 
 class AdminManagement:
@@ -42,8 +43,45 @@ class AdminManagement:
         admin = self.db.find(self.collection_name, {"email": email})
         return self.dump(admin)
 
-    def get_all_admins(self):
-        pass
+    def get_all_admins(self, sort, page, page_size, field, value):
+        query = None
+        if field == None:
+            query = {}
+        else:
+            field = field.lower()
+            if field == "email":
+                # Check for email
+                query = {"email": {'$regex': value}}
+            elif field == "name":
+                query = {
+                    "$or": [{
+                        "first_name": {
+                            '$regex': value
+                        }
+                    }, {
+                        "last_name": {
+                            '$regex': value
+                        }
+                    }]
+                }
+                # Check for name
+            else:
+                # Invalid field
+                response = -1, 0
+
+        if not query == None:
+            list_of_admins = self.db.find_all(self.collection_name,
+                                              query,
+                                              next_page=page, page_size=page_size)
+            total_admins = self.db.get_count(self.collection_name, query)
+            admins = []
+            for admin in list_of_admins:
+                admins.append(
+                    self.dump(admin,
+                              exclude=["password", "reset_token.access_code"]))
+            response = admins, total_admins
+
+        return response
 
     def create_admin(self, first_name, last_name, email):
         try:
@@ -70,26 +108,33 @@ class AdminManagement:
             result = -1
         return result
 
-    def delete_admin(self, id, email=None):
+    def delete_admin(self, id):
         # If the parameter email field is not blank then it tries to delete by email. Otherwise it will look up by _id
-        admin = self.db.delete(self.collection_name, ({
-            "email": email
-        })) if not email == None else self.db.delete(self.collection_name,
+        return self.db.delete(self.collection_name,
                                                      ({
-                                                         "_id": id
+                                                         "_id": ObjectId(id)
                                                      }))
-        print(self.dump(admin))
-        return self.dump(admin)
 
-    def update_admin(self, id, name, password, comment=""):
-        pass
-
-    def update_password(self, email, new_password):
-        # updated = self.db.update({email:email}, {$set: {password: new_password}})
-
-        new_password = {"$set": {"password": new_password}}
-        email = {"first_name": email}
-        updated = self.db.update(self.collection_name, email, new_password)
+    def update_admin(self, id, first_name, last_name, password, old_password):
+        update_fields = {}
+        admin = self.db.find(self.collection_name, {"_id": ObjectId(id)})
+        if admin == None:
+            # Admin does not exist
+            response = -1
+        elif not verify_hash(old_password, admin["password"]):
+            # Password doesn't match
+            response = -2
+        else:
+            if first_name:
+                update_fields["first_name"] = first_name
+            if last_name:
+                update_fields["last_name"] = last_name
+            if password:
+                update_fields["password"] = hash_password(password)
+            response = self.db.update(self.collection_name,
+                                      {"_id": ObjectId(id)},
+                                      {"$set": update_fields})
+        return response
 
     def request_reset(self, email):
         user = self.db.find(self.collection_name, {"email": email})
@@ -172,6 +217,6 @@ class AdminManagement:
                 response = -4, None
 
         return response
-
-    def dump(self, data):
-        return AdminSchema().dump(data).data
+      
+    def dump(self, data, exclude=[]):
+        return AdminSchema(exclude=exclude).dump(data).data
