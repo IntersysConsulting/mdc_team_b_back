@@ -25,8 +25,6 @@ class Mongo:
 
     def find_all(self, collection, selector, sort, _ascending, _next_page,
                  _page_size):
-        print("Paremeters. _ascending {}, _next_page {}, _page_size {}".format(
-            _ascending, _next_page, _page_size))
         allDocuments = []
         for document in self.db[collection].find(selector).skip(
                 _next_page * _page_size).limit(_page_size):
