@@ -26,7 +26,7 @@ def Put(args, identity):
     quantity = args['quantity']
     customer_id = identity
 
-    if quantity < 0:
+    if quantity <= 0:
         response = jsonify({
             "statusCode": 406,
             "message": "Can't accept negative products."
