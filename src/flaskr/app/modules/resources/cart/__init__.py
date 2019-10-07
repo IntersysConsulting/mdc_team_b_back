@@ -76,20 +76,19 @@ class CartManager():
         cart = CartSchema(exclude=['_id', 'user']).dump(
             self.db.find(self.collection_name, {"user": ObjectId(user)})).data 
 
-        product_list = []         
-        for product in cart['products']:
-            print("Product = {}".format(product))
-            _product =  up.get_one(product["product"])
-            product_list.append({
-                "_id":_product["_id"], 
-                "price":_product["price"], 
-                "image":_product["img"], 
-                "name":_product["name"], 
-                "quantity":product["quantity"]
-            })
+        if len(cart):
+            product_list = []
+            for product in cart['products']:
+                _product =  up.get_one(product["product"])
+                product_list.append({
+                    "_id":_product["_id"], 
+                    "price":_product["price"], 
+                    "image":_product["img"], 
+                    "name":_product["name"], 
+                    "quantity":product["quantity"]
+                })
 
-        cart["products"] = product_list
-        print("The cart is {}".format(cart))
+            cart["products"] = product_list
         return cart
 
     def delete_cart(self, user, pid, cart):
@@ -106,19 +105,12 @@ class CartManager():
         cart_id = self.db.find(self.collection_name,
                             {"user": ObjectId(user)})['_id']
 
-        #self.db.delete(self.collection_name, {"user": ObjectId(user)})
-
         if not us.get_one(pid) :
             result = 2
         else:
             try:
-                products = [str(x['product']) for x in cart['products']]
-                index_to_insert_on = products.index(pid)
                 command = "$pull"
                 where = "products"
-
-                print(index_to_insert_on)
-
                 result = self.db.update(self.collection_name,
                                 {"_id": ObjectId(cart_id)}, {
                                     command: {
@@ -127,8 +119,6 @@ class CartManager():
                                         }
                                     }
                                 })
-
-
             except:
                 print('There is no product {} in the cart'.format(pid))
                 result = 0
