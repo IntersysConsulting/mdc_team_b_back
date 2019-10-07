@@ -86,17 +86,21 @@ class UserOrders(Resource):
 class AdminOrders(Resource):
     @admin_ns.response(200, 'Order successfully updated')
     @admin_ns.expect(admin_order_update_parser)
+    @jwt_required
     def put(self):
         '''
         NYI Updates a order status on the database
         '''
         args = admin_order_update_parser.parse_args()
-        return AdminPut(args)
+        identity = get_jwt_identity()
+        return AdminPut(args, identity)
 
     @admin_ns.expect(admin_order_get_parser)
+    @jwt_required
     def get(self):
         """
-        NYI Returns a list of orders from all the users. May be sorted and filtered.
+        √ Returns a list of orders from all the users. May be sorted and filtered.
         """
         args = admin_order_get_parser.parse_args()
-        return AdminGet(args)
+        identity = get_jwt_identity()
+        return AdminGet(args, identity)

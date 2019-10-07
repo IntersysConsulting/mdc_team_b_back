@@ -12,6 +12,8 @@ from .schema import OrderSchema
 # Validate operation logic here, not permission to access it.
 
 
+
+
 class UserOrder():
     def __init__(self):
         self.collection_name = "orders"
@@ -29,7 +31,7 @@ class UserOrder():
         return self.db.find(
             self.collection_name, {
                 "customer_id": ObjectId(user_id),
-                "status": ObjectId(self.statuses["In checkout"])
+                "status": ObjectId(self.statuses["In Checkout"])
             })
 
     def make_order(self, cart, user_id):
@@ -63,7 +65,7 @@ class UserOrder():
         # After all the items have been added to the order we finish it up
         new_order = {
             "customer_id": ObjectId(user_id),
-            "status": ObjectId(self.statuses["In checkout"]),
+            "status": ObjectId(self.statuses["In Checkout"]),
             "products": products_in_order,
             "total": total
         }
@@ -127,7 +129,7 @@ class UserOrder():
             else:
                 # We could not update the order
                 response = 0
-                        
+
         return response
 
 
@@ -161,14 +163,45 @@ class UserOrder():
 
 class AdminOrder():
     def __init__(self):
-        self.todo = "Implement this class with actions only an admin can do"
+        self.collection_name = "orders"
+        self.db = Database()
+        tmp_statuses = self.db.find_all("order_statuses", {})
+        self.statuses = {}
+        self.value_to_status = {}
+        for i in range(len(tmp_statuses)):
+            key = tmp_statuses[i]["name"]
+            value = str(tmp_statuses[i]["_id"])
+            self.statuses[key] = value
+            self.value_to_status[value] = key
 
-    def GetAll(self, filter, sort, ascending=True, page=0):
-        Database.find_all(self.collection_name,
-                          {'field': {
-                              '$regex': r'^the-regex'
-                          }}, sort, ascending, page)
-        pass
+    def get_all_orders(
+            self,
+            filter,
+            sort,
+            page,
+            page_size,
+            ascending=True):
+
+        exclude_list = [ x.strip().title() for x in filter.split(',')]
+        print("exclude_list = {}".format(exclude_list))
+        status_names = [ x for x in self.statuses.keys()]
+        print("status_names = {}".format(status_names))
+        include_list = [ x for x in status_names if x not in exclude_list ]
+        print("include_list = {}".format(include_list))
+        search_in =  [ {"status":ObjectId(self.statuses[x])} for x in include_list ]
+        print("search_in = {}".format(search_in))
+
+
+        total = self.db.get_count(self.collection_name, {"$or": search_in})
+        all_orders = self.db.find_all(self.collection_name, {"$or":search_in})
+        output = []
+        for order in all_orders:
+            output.append(self.dump(order))
+
+        return output, total
 
     def change_order_status(self, id, status):
         pass
+
+    def dump(self, data, exclude=[]):
+        return OrderSchema(exclude=exclude).dump(data).data
