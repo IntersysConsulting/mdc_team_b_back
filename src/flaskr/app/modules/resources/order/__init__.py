@@ -12,13 +12,11 @@ from .schema import OrderSchema
 # Validate operation logic here, not permission to access it.
 
 
-
-
 class UserOrder():
     def __init__(self):
         self.collection_name = "orders"
         self.db = Database()
-        tmp_statuses = self.db.find_all("order_statuses", {})
+        tmp_statuses = self.db.find_all("order_statuses", {}, page_size=1000)
         self.statuses = {}
         self.value_to_status = {}
         for i in range(len(tmp_statuses)):
@@ -31,7 +29,7 @@ class UserOrder():
         return self.db.find(
             self.collection_name, {
                 "customer_id": ObjectId(user_id),
-                "status": ObjectId(self.statuses["In Checkout"])
+                "status": ObjectId(self.statuses["Pending"])
             })
 
     def make_order(self, cart, user_id):
@@ -50,7 +48,8 @@ class UserOrder():
         #   products_in_order = Output list of all the order_product variant of products
 
         for cart_product in products_in_cart:
-            db_product = up.get_one(cart_product["product"])
+            print("Cart product = {}".format(cart_product))
+            db_product = up.get_one(cart_product["_id"])
             # This is an instance of a product in the order
             order_product = {
                 "name": db_product["name"],
@@ -65,7 +64,7 @@ class UserOrder():
         # After all the items have been added to the order we finish it up
         new_order = {
             "customer_id": ObjectId(user_id),
-            "status": ObjectId(self.statuses["In Checkout"]),
+            "status": ObjectId(self.statuses["Pending"]),
             "products": products_in_order,
             "total": total
         }
@@ -132,13 +131,12 @@ class UserOrder():
 
         return response
 
-
     def cancel_checkout(self, user_id):
         order = self.find_in_checkout_order(user_id)
         if order != None:
             # User has an order to be checked out.
             result = self.db.delete(self.collection_name,
-                                      {"_id": ObjectId(order["_id"])})
+                                    {"_id": ObjectId(order["_id"])})
             response = 1 if result == 1 else -1
         else:
             # No changes, still successful
@@ -165,7 +163,7 @@ class AdminOrder():
     def __init__(self):
         self.collection_name = "orders"
         self.db = Database()
-        tmp_statuses = self.db.find_all("order_statuses", {})
+        tmp_statuses = self.db.find_all("order_statuses", {}, page_size=1000)
         self.statuses = {}
         self.value_to_status = {}
         for i in range(len(tmp_statuses)):
@@ -173,35 +171,75 @@ class AdminOrder():
             value = str(tmp_statuses[i]["_id"])
             self.statuses[key] = value
             self.value_to_status[value] = key
+        self.status_names = [x for x in self.statuses.keys()]
 
-    def get_all_orders(
-            self,
-            filter,
-            sort,
-            page,
-            page_size,
-            ascending=True):
+    def get_all_orders(self, filter, sort, page, page_size, ascending=True):
 
-        exclude_list = [ x.strip().title() for x in filter.split(',')]
-        print("exclude_list = {}".format(exclude_list))
-        status_names = [ x for x in self.statuses.keys()]
-        print("status_names = {}".format(status_names))
-        include_list = [ x for x in status_names if x not in exclude_list ]
-        print("include_list = {}".format(include_list))
-        search_in =  [ {"status":ObjectId(self.statuses[x])} for x in include_list ]
-        print("search_in = {}".format(search_in))
-
+        exclude_list = [x.strip().title() for x in filter.split(',')]
+        include_list = [x for x in self.status_names if x not in exclude_list]
+        search_in = [{
+            "status": ObjectId(self.statuses[x])
+        } for x in include_list]
 
         total = self.db.get_count(self.collection_name, {"$or": search_in})
-        all_orders = self.db.find_all(self.collection_name, {"$or":search_in})
+        all_orders = self.db.find_all(self.collection_name, {"$or": search_in})
         output = []
         for order in all_orders:
-            output.append(self.dump(order))
+            _order = self.dump(order)
+            # Translates object id to readable string
+            _order["status"] = self.value_to_status[_order["status"]]
+            output.append(_order)
 
         return output, total
 
-    def change_order_status(self, id, status):
-        pass
+    def change_order_status(self, order_id, status):
+        if not status.title() in self.status_names:
+            # Status does not exist
+            response = -1
+        else:
+            order = self.db.find(self.collection_name,
+                                 {"_id": ObjectId(order_id)})
+            if order == None:
+                # Order does not exist
+                response = -2
+            else:
+                old_status = self.value_to_status[str(order["status"])]
+                print("Trying to go from {} to {}".format(
+                    old_status, status.title()))
+                if not self.is_valid_change(old_status, status):
+                    # Change is not valid
+                    response = -3
+                else:
+                    status_id = ObjectId(self.statuses[status.title()])
+                    response = self.db.update(self.collection_name,
+                                              {"_id": ObjectId(order_id)},
+                                              {"$set": {
+                                                  "status": status_id
+                                              }})
+        return response
+
+    def is_valid_change(self, old_status, new_status):
+        '''
+        Based on the state machine, returns a True if the change from old_status to new_status is valid. 
+        '''
+        response = False
+        if old_status == "Pending":
+            if new_status == "Awaiting Fulfillment" or new_status == "Awaiting Payment" or new_status == "Declined":
+                response = True
+        elif old_status == "Awaiting Payment":
+            if new_status == "Awaiting Fulfillment":
+                response = True
+        elif old_status == "Awaiting Fulfillment":
+            if new_status == "Awaiting Shipment" or new_status == "Refunded" or new_status == "Completed":
+                response = True
+        elif old_status == "Awaiting Shipment":
+            if new_status == "Shipped":
+                response = True
+        elif old_status == "Shipped":
+            if new_status == "Completed":
+                response = True
+
+        return response
 
     def dump(self, data, exclude=[]):
         return OrderSchema(exclude=exclude).dump(data).data

@@ -15,9 +15,6 @@ class Database(object):
                  next_page=0,
                  page_size=None):
         get_page_size = _Page_Size if page_size == None else page_size
-        print(
-            "Querying with table: {} selector: {} sort: {} page:{} page_size:{}"
-            .format(table, selector, sort, next_page, get_page_size))
         result = self.client.find_all(table, selector, sort, asc, next_page,
                                       get_page_size)
         return result

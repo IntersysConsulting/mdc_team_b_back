@@ -89,7 +89,7 @@ class AdminOrders(Resource):
     @jwt_required
     def put(self):
         '''
-        NYI Updates a order status on the database
+        √ Updates a order status on the database
         '''
         args = admin_order_update_parser.parse_args()
         identity = get_jwt_identity()
