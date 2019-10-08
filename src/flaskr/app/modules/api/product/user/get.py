@@ -41,7 +41,7 @@ Parser.add_argument(
 def Get(args):
     search_name = args['search_name']
     digital_filtering = 0 if not args['digital_filtering'] else args[
-        'digital_filtering ']
+        'digital_filtering']
     sort = 0 if not args['sort'] else args['sort']
     page = 0 if not args['page'] else args['page']
     page_size = None if not args['page_size'] else args['page_size']

@@ -35,6 +35,11 @@ class UserProduct():
         else:
             selector = {'name': {'$regex': r''}}
 
+        if digital == 1:
+            selector['digital'] = True
+        elif digital == -1:
+            selector['digital'] = False
+
         print("Trying to query with {}".format(selector))
         total = self.db.get_count(self.collection_name, selector)
         print("The total I got was {}".format(total))
