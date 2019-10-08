@@ -18,7 +18,7 @@ Parser.add_argument('price',
                     help='Price in cents of the product to be added',
                     required=True,
                     location='form')
-Parser.add_argument('picture',
+Parser.add_argument('image',
                     help='Picture of the product to be added',
                     type=FileStorage,
                     location='files',
@@ -42,7 +42,7 @@ def Post(args, identity):
     # They are put into a python dictionary, we can access them like this.
     name = args['name']
     price = args['price']
-    picture = args['picture']
+    image = args['image']
     digital = args['digital']
     # Manage optional fields like this. This is an inline optional assignation
     #              True value            IF    condition    ELSE       False value
