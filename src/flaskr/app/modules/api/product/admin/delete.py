@@ -3,6 +3,7 @@ from flask_restplus.namespace import RequestParser
 from ....resources.product import AdminProduct
 from ....resources.validation import is_admin, is_not_admin_response
 from bson.errors import InvalidId
+from ....resources import responses
 #################
 # Parser        #
 #################
@@ -22,28 +23,20 @@ def Delete(args, identity):
     ap = AdminProduct()
 
     if not is_admin(identity):
-        response = jsonify(is_not_admin_response)
+        response = is_not_admin_response
     else:
         try:
             result = ap.delete_product(pId)
 
-            if (result > 0):
-                response = jsonify({
-                    "statusCode": 200,
-                    "message": "Successfully deleted a product",
-                })
-            elif (result < 0):
-                response = jsonify({
-                    "statusCode": 400,
-                    "message": "Item not found"
-                })
+            if result == 1:
+                response = responses.success("Deleted a product")
+            elif result == -1:
+                response = responses.element_does_not_exist("Product")
+            elif result == 0:
+                response = responses.operation_failed("Delete a product")
             else:
-                response = jsonify({
-                    "statusCode":
-                    400,
-                    "message":
-                    "Could not delete the specified product",
-                })
+                response = responses.unexpected_result(result)
+
         except InvalidId:
             response = jsonify({
                 "statusCode": 400,

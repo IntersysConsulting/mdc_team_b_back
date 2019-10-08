@@ -5,6 +5,7 @@ from werkzeug.datastructures import FileStorage
 from ....resources.product import AdminProduct
 from ....resources.validation import is_admin, is_not_admin_response
 from ....resources.images import upload_image
+from ....resources import responses
 import tempfile
 #################
 # Parser        #
@@ -26,8 +27,8 @@ Parser.add_argument(
     required=False,
     location='form')
 Parser.add_argument(
-    'picture',
-    help='Picture of the product to be updated. If blank will use previous.',
+    'image',
+    help='Image of the product to be updated. If blank will use previous.',
     type=FileStorage,
     location='files',
     required=False)
@@ -48,31 +49,23 @@ Parser.add_argument('description',
 
 def Put(args, identity):
     pId = args['id']
-    name = None if not args['name'] else args['name']
-    price = None if not args['price'] else args['price']
-    picture = None if not args['picture'] else args['picture']
-    description = None if not args['description'] else args[
-        'description']  #Do this for optional fields
+    name = args['name']
+    price = args['price']
+    image = args['image']
+    description = args['description']
     digital = args['digital']
     image_name = None
-
 
     if not is_admin(identity):
         response = jsonify(is_not_admin_response)
     else:
-        if picture != None:
-            tmpDir = tempfile.TemporaryDirectory()
-            image_dir = "{}\\{}".format(tmpDir.name, picture.filename)
-            print("Saving the picture in {}".format(image_dir))
-            picture.save(image_dir)
-            image_result = upload_image(image_dir)
-            print("Image result was: {}".format(image_result))
-            image_name = image_result["link"]
-            tmpDir.cleanup()
+        if image != None:
+            upload_result = upload_image(image)
+            image_name = upload_result["link"] if upload_result[
+                'status'] == 200 else None
         else:
             image_name = None
-            image_result = {"status": 200}
-            #Pretend it was successful
+
         ap = AdminProduct()
         result = ap.update_product(pId,
                                    name,
@@ -81,24 +74,14 @@ def Put(args, identity):
                                    digital,
                                    description=description)
 
-        if result > 0:
-            if image_result['status'] == 200:
-                response = jsonify({
-                    "statusCode": 200,
-                    "message": "Successfully updated a product",
-                })
+        if result == 1:
+            if image is None or (image is not None and image_name is not None):
+                response = responses.success("Update product")
             else:
-                response = jsonify({
-                    "statusCode":
-                    206,
-                    "message":
-                    "Successfully updated a product, but the image could not be updated.",
-                })
+                response = responses.partial_success("Update product",
+                                                     "Upload image")
+        elif result == 0:
+            response = responses.operation_failed("Update product")
         else:
-            response = jsonify({
-                "statusCode":
-                400,
-                "message":
-                "Could not update the specified product",
-            })
+            response = responses.unexpected_result(result)
     return response

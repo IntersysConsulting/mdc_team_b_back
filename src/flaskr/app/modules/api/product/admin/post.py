@@ -4,6 +4,7 @@ from werkzeug.datastructures import FileStorage
 from ....resources.product import AdminProduct
 from ....resources.validation import is_admin, is_not_admin_response
 from ....resources.images import upload_image
+from ....resources import responses
 import tempfile
 #################
 # Parser        #
@@ -51,40 +52,25 @@ def Post(args, identity):
     if not is_admin(identity):
         response = jsonify(is_not_admin_response)
     else:
-
-        tmpDir = tempfile.TemporaryDirectory()
-        image_dir = "{}\\{}".format(tmpDir.name, picture.filename)
-        print("Saving the picture in {}".format(image_dir))
-        picture.save(image_dir)
-        image_result = upload_image(image_dir)
-        print("Image result was: {}".format(image_result))
-        tmpDir.cleanup()
+        upload_result = upload_image(image)
+        image_name = upload_result["link"] if upload_result[
+            'status'] == 200 else ""
 
         ap = AdminProduct()
-        success = ap.create_product(name,
-                                    price,
-                                    image_result["link"],
-                                    digital,
-                                    description=description).acknowledged
+        result = ap.create_product(name,
+                                   price,
+                                   image_name,
+                                   digital,
+                                   description=description).acknowledged
 
-        if (success):
-            if image_result['status'] == 200:
-                response = jsonify({
-                    "statusCode": 200,
-                    "message": "Successfully updated a product",
-                })
+        if result == 1:
+            if image_name is not "":
+                response = responses.success("Create new product")
             else:
-                response = jsonify({
-                    "statusCode":
-                    206,
-                    "message":
-                    "Successfully updated a product, but the image could not be updated.",
-                })
+                response = responses.partial_success("Create new product",
+                                                     "Upload image")
+        elif result == 0:
+            response = responses.operation_failed("Create new product")
         else:
-            response = jsonify({
-                "statusCode":
-                400,
-                "message":
-                "There was an error creating a product",
-            })
+            response = responses.unexpected_result(result)
     return response
