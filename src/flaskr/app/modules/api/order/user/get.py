@@ -9,10 +9,9 @@ Parser.add_argument('sort',
                     type=int,
                     help='ID of the sorting method to be used (NYI)',
                     required=False)
-Parser.add_argument(
-    'filter',
-    help='A comma separated string of all the filters that apply (NYI)',
-    required=False)
+Parser.add_argument('filter',
+                    help='Comma separated string of all filters that apply. If left blank it will give every order. Otherwise it will be an inclusive filter. Only giving out the statuses that are in the filter.',
+                    required=False)
 Parser.add_argument('page',
                     type=int,
                     help='Page the request is asking for',
@@ -23,7 +22,7 @@ Parser.add_argument('page',
 
 
 def Get(args, identity):
-    filter = " " if not args['filter'] else args['filter']
+    filter = args['filter']
     sort = 0 if not args['sort'] else args['sort']
     page = 0 if not args['page'] else args['page']
 

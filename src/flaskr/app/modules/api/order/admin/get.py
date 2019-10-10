@@ -13,7 +13,7 @@ Parser.add_argument('sort',
 Parser.add_argument(
     'filter',
     help=
-    'A comma separated string of all the status names that we are excluding. Capitalizes the first letter of each word.',
+    'A comma separated string of all the status names that we are excluding. Capitalizes the first letter of each word internally.',
     required=False)
 Parser.add_argument('page',
                     type=int,

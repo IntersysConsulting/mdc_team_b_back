@@ -24,6 +24,7 @@ class UserOrder():
             value = str(tmp_statuses[i]["_id"])
             self.statuses[key] = value
             self.value_to_status[value] = key
+        self.status_names = [x for x in self.statuses.keys()]
 
     def find_in_checkout_order(self, user_id):
         return self.db.find(
@@ -144,8 +145,18 @@ class UserOrder():
         return response
 
     def get_user_orders(self, user_id, filter, sort, ascending=True, page=0):
+        if filter is None:
+            include_list = self.status_names
+        else:
+            include_list = [x.strip().title() for x in filter.split(',')]
+
+        search_in = [{
+            "status": ObjectId(self.statuses[x]),
+            'customer_id': ObjectId(user_id)
+        } for x in include_list]
+
         orders = self.db.find_all(self.collection_name,
-                                  {'customer_id': ObjectId(user_id)}, sort,
+                                  {"$or":search_in}, sort,
                                   ascending, page)
         response = []
         for order in orders:
