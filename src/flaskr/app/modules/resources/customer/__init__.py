@@ -10,7 +10,7 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
 from bson.objectid import ObjectId
 from ..validation import is_guest, is_customer, is_customer_email_available
 from copy import deepcopy
-
+from ..cart import CartManager
 
 class CustomerManager():
     def __init__(self):
@@ -20,6 +20,9 @@ class CustomerManager():
     def make_guest(self):
         new_user = {"is_guest": True}
         result = self.db.create(self.collection_name, new_user)
+        if result is not None:
+            cm = CartManager()
+            cm.make_new_cart(ObjectId(result.inserted_id))            
         return result
 
     #region Customer Data

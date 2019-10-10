@@ -120,7 +120,7 @@ class AdminProduct():
         if not name == None:
             product['name'] = name
         if not price == None:
-            product['price'] = price
+            product['price'] = int(price)
         if not img == None:
             product['img'] = img
         if not digital == None:

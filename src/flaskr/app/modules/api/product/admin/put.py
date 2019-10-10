@@ -24,6 +24,7 @@ Parser.add_argument(
     'price',
     help=
     'Price in cents of the product to be updated. If blank will use previous.',
+    type=int,
     required=False,
     location='form')
 Parser.add_argument(

@@ -16,6 +16,7 @@ Parser.add_argument('name',
                     location='form')
 Parser.add_argument('price',
                     help='Price in cents of the product to be added',
+                    type=int,
                     required=True,
                     location='form')
 Parser.add_argument('image',
