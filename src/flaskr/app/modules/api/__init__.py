@@ -29,6 +29,25 @@ api = Api(v1_blueprint,
 
 #Handlers for jwt exceptions
 
+@api.errorhandler(IndexError)
+def handle_indexerror(error):
+    return jsonify({
+        "statusCode": 401,
+        "message": "Invalid or missing credentials",
+        "data": {
+            "Auth": error.message
+        }
+    })
+
+@api.errorhandler(jwt.exceptions.DecodeError)
+def handle_decodeerror(error):
+    return jsonify({
+        "statusCode": 401,
+        "message": "Invalid or missing credentials",
+        "data": {
+            "Auth": error.message
+        }
+    })
 
 @api.errorhandler(jwt.ExpiredSignatureError)
 def handle_validation_signature(error):
