@@ -4,4 +4,4 @@ python:
 before_script:
   - pip install -r src/requirements.txt
 script:
-  - python src/flaskr/manage.py run_tests
+  - cd src && python flaskr/manage.py run_tests
