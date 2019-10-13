@@ -1,5 +1,7 @@
 language: python
 python:
   - 3.6
-before_install:
+before_script:
   - pip install -r src/requirements.txt
+script:
+  - python src/flaskr/manage.py run_tests
