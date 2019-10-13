@@ -1,12 +1,10 @@
-from app import create_app
-import os
+from jwtholder import *
 from flask_script import Manager
-from app import db
 
-#app = create_app(os.environ['CONFIG_TYPE'])
-app = create_app(config_type='dev')
+from time import sleep
+import threading
+
 manager = Manager(app)
-
 
 @manager.command
 def run():
@@ -20,6 +18,12 @@ def run_tests():
     import unittest
     tests = unittest.TestLoader().discover('tests')
     unittest.TextTestRunner(verbosity=2).run(tests)
+
+@manager.command
+def travis_test():
+    pass
+    #threading.Thread(target=app.run)
+    
 
 
 @manager.command
