@@ -10,8 +10,7 @@ from ....resources import responses
 Parser = RequestParser()
 Parser.add_argument('id',
                     help='ID of the product to be deleted',
-                    required=True,
-                    location='form')
+                    required=True)
 
 #################
 # Method        #
