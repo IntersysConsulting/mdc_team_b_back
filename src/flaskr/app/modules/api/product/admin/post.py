@@ -23,7 +23,7 @@ Parser.add_argument('image',
                     help='Picture of the product to be added',
                     type=FileStorage,
                     location='files',
-                    required=True)
+                    required=False)
 Parser.add_argument('digital',
                     help="Whether the product is a digital product or not",
                     type=bool,
@@ -37,6 +37,8 @@ Parser.add_argument('description',
 #################
 # Method        #
 #################
+
+placeholder_image = "https://i.imgur.com/JelTlmk.png"
 
 
 def Post(args, identity):
@@ -53,9 +55,12 @@ def Post(args, identity):
     if not is_admin(identity):
         response = jsonify(is_not_admin_response)
     else:
-        upload_result = upload_image(image)
-        image_name = upload_result["link"] if upload_result[
-            'status'] == 200 else ""
+        if image is None:
+            image_name = placeholder_image
+        else:
+            upload_result = upload_image(image)
+            image_name = upload_result["link"] if upload_result[
+                'status'] == 200 else placeholder_image
 
         ap = AdminProduct()
         result = ap.create_product(name,
