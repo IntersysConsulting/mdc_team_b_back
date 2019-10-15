@@ -145,16 +145,19 @@ class UserOrder():
         return response
 
     def get_user_orders(self, user_id, filter, sort, ascending=True, page=0):
-        if filter is None:
-            include_list = self.status_names
-        else:
-            include_list = [x.strip().title() for x in filter.split(',')]
+        # if filter is None:
+        #     include_list = self.status_names
+        # else:
+        #     include_list = [x.strip().title() for x in filter.split(',')]
 
-        search_in = [{
-            "status": ObjectId(self.statuses[x]),
-            'customer_id': ObjectId(user_id)
-        } for x in include_list]
+        # search_in = [{
+        #     "status": ObjectId(self.statuses[x]),
+        #     'customer_id': ObjectId(user_id)
+        # } for x in include_list]
 
+        search_in = [ {"status":ObjectId(self.statuses["Pending"]),"customer_id":ObjectId(user_id)}]
+
+        # print("Search in: {}".format(search_in))
         orders = self.db.find_all(self.collection_name,
                                   {"$or":search_in}, sort,
                                   ascending, page)
@@ -164,6 +167,7 @@ class UserOrder():
             dumped_order["status"] = self.value_to_status[
                 dumped_order["status"]]
             response.append(dumped_order)
+
         return response
 
     def dump(self, data, exclude=[]):
