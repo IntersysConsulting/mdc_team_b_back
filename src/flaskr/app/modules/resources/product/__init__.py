@@ -3,6 +3,7 @@ from ...db import Database
 from .schema import ProductSchema
 from datetime import datetime
 from bson.objectid import ObjectId
+from ..cart import CartManager
 import re
 # In this file we implement methods that serve as a middle point between the exposed endpoint and the
 # actual middleware.
@@ -75,14 +76,19 @@ class AdminProduct():
 
         return self.db.create(self.collection_name, new_product)
 
-    def delete_product(self, id):
-        print("Deleting the product {}".format(id))
+    def delete_product(self, product_id):
+        print("Deleting the product {}".format(product_id))
+        cm = CartManager()
 
         found_an_item = self.db.find(self.collection_name,
-                                     {"_id": ObjectId(id)})
+                                     {"_id": ObjectId(product_id)})
         if found_an_item:
+            deleted = cm.delete_product_from_carts(product_id)
             response = self.db.delete(self.collection_name,
-                                      {"_id": ObjectId(id)})
+                                      {"_id": ObjectId(product_id)})
+            if response is 1 and not deleted:
+                print("There are some carts that haven't been emptied.")
+                response = -2
         else:
             response = -1
         return response
