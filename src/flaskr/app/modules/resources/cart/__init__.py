@@ -90,7 +90,6 @@ class CartManager():
         if len(cart):
             product_list = []
             for product in cart['products']:
-                print("This is the product = {}".format(product))
                 _product = up.get_one(product["product"])
                 if len(_product) is 0:
                     self.remove_product(raw_cart["_id"], product["product"])
@@ -117,7 +116,6 @@ class CartManager():
         '''
         result = 0
         us = product_manager.UserProduct()
-        print("Cart ID {} PID {}".format(cart_id, pid))
 
         if not us.get_one(pid):
             result = 2
@@ -152,7 +150,6 @@ class CartManager():
         deleted_count = 0
         for cart in carts:
             cart_id = cart["_id"]
-            print("Cart id = {}".format(cart_id))
             result = self.remove_product(cart_id, product_id)
             deleted_count += 1 if result is 1 else 0
         print("Deleted {} out of {} possible.".format(deleted_count,
