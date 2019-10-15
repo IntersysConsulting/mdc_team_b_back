@@ -17,7 +17,6 @@ def Get(identity):
     else:
         cm = CustomerManager()
         customer = cm.get_data(identity)
-        print("We got this customer: {}".format(customer))
         #Here we get all the customer account details. Then we probably save it on backend.
         response = jsonify({
             "statusCode": 200,

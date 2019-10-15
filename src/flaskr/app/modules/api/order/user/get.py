@@ -9,9 +9,11 @@ Parser.add_argument('sort',
                     type=int,
                     help='ID of the sorting method to be used (NYI)',
                     required=False)
-Parser.add_argument('filter',
-                    help='Comma separated string of all filters that apply. If left blank it will give every order. Otherwise it will be an inclusive filter. Only giving out the statuses that are in the filter.',
-                    required=False)
+Parser.add_argument(
+    'filter',
+    help=
+    'Comma separated string of all filters that apply. If left blank it will give every order. Otherwise it will be an inclusive filter. Only giving out the statuses that are in the filter.',
+    required=False)
 Parser.add_argument('page',
                     type=int,
                     help='Page the request is asking for',
@@ -28,7 +30,6 @@ def Get(args, identity):
 
     uo = UserOrder()
     result = uo.get_user_orders(identity, filter, sort, page=page)
-    print("Result = {}".format(result))
 
     response = jsonify({
         "statusCode": 200,
