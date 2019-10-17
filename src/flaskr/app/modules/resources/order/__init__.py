@@ -144,21 +144,17 @@ class UserOrder():
         return response
 
     def get_user_orders(self, user_id, filter, sort, ascending=True, page=0):
-        # if filter is None:
-        #     include_list = self.status_names
-        # else:
-        #     include_list = [x.strip().title() for x in filter.split(',')]
-
-        # search_in = [{
-        #     "status": ObjectId(self.statuses[x]),
-        #     'customer_id': ObjectId(user_id)
-        # } for x in include_list]
-
-        search_in = [ {"status":ObjectId(self.statuses["Pending"]),"customer_id":ObjectId(user_id)}]
-
-        # print("Search in: {}".format(search_in))
+        if filter is None:
+            include_list = self.status_names
+        else:
+            include_list = [x.strip().title() for x in filter.split(',')]
+        search_in = [{
+            "status": ObjectId(self.statuses[x])
+        } for x in include_list]
+        query = {"$and": [{'customer_id': ObjectId(user_id)}, {"$or":search_in}]}
+        # search_in = [ {"status":ObjectId(self.statuses["Pending"]),"customer_id":ObjectId(user_id)}]
         orders = self.db.find_all(self.collection_name,
-                                  {"$or":search_in}, sort,
+                                  query, sort,
                                   ascending, page)
         response = []
         for order in orders:
