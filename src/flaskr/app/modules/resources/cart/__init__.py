@@ -120,7 +120,7 @@ class CartManager():
         if not us.get_one(pid):
             result = 2
         else:
-            result = remove_product(cart_id, pid)
+            result = self.remove_product(cart_id, pid)
 
         return result
 
