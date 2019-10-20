@@ -24,6 +24,7 @@ class Card(Resource):
     # GET
     #############
     @any_ns.response(200, "Card info was found")
+    @any_ns.response(400, "No cards registered")
     @any_ns.expect(get_cards_parser)
     @jwt_required
     def get(self):

@@ -43,3 +43,29 @@ class CardManager(object):
                 ) is None:
                     result = -1
         return result
+
+    def get_cards(self, user, limit=10):
+        '''
+        Get cards from stripe account, will return a directory with 
+        card's brand, funding and last4 digits
+        '''
+
+        record = self.db.find(self.collection_name, {'_id': ObjectId(user)})
+        try:
+            cards = stripe.Customer.list_sources(
+                record['stripe_id'],
+                limit=limit,
+                object='card'
+            )
+
+            card_list = []
+            for element in cards['data']:
+                card_list.append({
+                    'brand':element['brand'],    
+                    'funding':element['funding'],
+                    'last4':element['last4']
+                })
+        except KeyError:
+            card_list = None
+ 
+        return card_list
