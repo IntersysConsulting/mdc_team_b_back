@@ -46,7 +46,7 @@ class Card(Resource):
         √  Add a user's payment card to the list. Create a list and added a card if the list does not exists.
         '''
         identify = get_jwt_identity()
-        args = get_cards_parser.parse_args()
+        args = put_cards_parser.parse_args()
         return Put(args, identify)
 
     #############
