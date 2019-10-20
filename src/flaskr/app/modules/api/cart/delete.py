@@ -17,6 +17,7 @@ Parser.add_argument('product_id',
 # Method        #
 #################
 
+
 @jwt_required
 def Delete(args, identity):
     pid = args['product_id']
@@ -26,30 +27,26 @@ def Delete(args, identity):
         if identity is not None:
             cart = cm.get_cart(identity)
             if len(cart):
-                result = cm.delete_cart(identity, pid, cart)
+                result = cm.delete_cart(identity, pid)
                 if result == 0:
                     response = jsonify({
-                    "statusCode":
-                    204,
-                    "message":
-                    "Product was not in cart."
-                })
+                        "statusCode": 204,
+                        "message": "Product was not in cart."
+                    })
 
                 if result == 1:
                     response = jsonify({
-                    "statusCode":
-                    200,
-                    "message":
-                    "Product was deleted successfully from the cart."
-                })                    
-                
+                        "statusCode":
+                        200,
+                        "message":
+                        "Product was deleted successfully from the cart."
+                    })
+
                 if result == 2:
                     response = jsonify({
-                    "statusCode":
-                    400,
-                    "message":
-                    "Product does not exist."
-                })
+                        "statusCode": 400,
+                        "message": "Product does not exist."
+                    })
 
     except ExpiredSignatureError:
         response = jsonify({
@@ -59,5 +56,5 @@ def Delete(args, identity):
                 "Auth": identity
             }
         })
-    
+
     return response

@@ -50,6 +50,8 @@ def Post(args, _id):
         response = jsonify({
             "statusCode": 200,
             "message": "Successfully created customer account",
+            "role":"Customer", 
+            "name":"{} {}".format(first_name, last_name)
         })
     elif result == -1:
         response = jsonify({

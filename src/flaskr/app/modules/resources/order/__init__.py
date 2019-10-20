@@ -49,7 +49,6 @@ class UserOrder():
         #   products_in_order = Output list of all the order_product variant of products
 
         for cart_product in products_in_cart:
-            print("Cart product = {}".format(cart_product))
             db_product = up.get_one(cart_product["_id"])
             # This is an instance of a product in the order
             order_product = {
@@ -149,14 +148,13 @@ class UserOrder():
             include_list = self.status_names
         else:
             include_list = [x.strip().title() for x in filter.split(',')]
-
         search_in = [{
-            "status": ObjectId(self.statuses[x]),
-            'customer_id': ObjectId(user_id)
+            "status": ObjectId(self.statuses[x])
         } for x in include_list]
-
+        query = {"$and": [{'customer_id': ObjectId(user_id)}, {"$or":search_in}]}
+        # search_in = [ {"status":ObjectId(self.statuses["Pending"]),"customer_id":ObjectId(user_id)}]
         orders = self.db.find_all(self.collection_name,
-                                  {"$or":search_in}, sort,
+                                  query, sort,
                                   ascending, page)
         response = []
         for order in orders:
@@ -164,6 +162,7 @@ class UserOrder():
             dumped_order["status"] = self.value_to_status[
                 dumped_order["status"]]
             response.append(dumped_order)
+
         return response
 
     def dump(self, data, exclude=[]):
