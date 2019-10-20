@@ -47,7 +47,7 @@ class CardManager(object):
     def get_cards(self, user, limit=10):
         '''
         Get cards from stripe account, will return a directory with 
-        card's brand, funding and last4 digits
+        card's id, brand, funding and last4 digits
         '''
 
         record = self.db.find(self.collection_name, {'_id': ObjectId(user)})
@@ -61,6 +61,7 @@ class CardManager(object):
             card_list = []
             for element in cards['data']:
                 card_list.append({
+                    'id':element['id'],
                     'brand':element['brand'],    
                     'funding':element['funding'],
                     'last4':element['last4']
