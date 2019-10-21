@@ -62,7 +62,7 @@ class Card(Resource):
         √ Removes an payment from the user's list
         '''
         identify = get_jwt_identity()
-        args = get_cards_parser.parse_args()
+        args = delete_cards_parser.parse_args()
         return Delete(args, identify)
 
 

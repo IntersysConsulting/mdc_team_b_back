@@ -70,3 +70,19 @@ class CardManager(object):
             card_list = None
  
         return card_list
+
+    def delete_card(self, user, card_id):
+        '''
+        Delete card from stripe account, this is action is performed
+        using the card id. Will return true if the card was deleted
+        '''
+        record = self.db.find(self.collection_name, {'_id': ObjectId(user)})
+        try:
+            response = stripe.Customer.delete_source(
+                record['stripe_id'],
+                card_id
+            )['deleted']
+        except KeyError:
+            response = False
+    
+        return response
