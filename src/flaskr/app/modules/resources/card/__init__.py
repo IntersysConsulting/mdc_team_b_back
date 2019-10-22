@@ -3,7 +3,7 @@ from bson.objectid import ObjectId
 from ...db import Database
 import stripe
 
-stripe.api_key = "sk_test_wCw3IAbkVh8jar3XopHWW6IB00FzBJsAya"
+stripe.api_key = "sk_test_Xq8C5Ra3nT5aW4PRgrXtQgJv00O7Sw81wo"
 
 class CardManager(object):
     def __init__(self):
@@ -25,7 +25,8 @@ class CardManager(object):
 
     def add_card(self, user, token):        
         '''
-        Add a new card to scripe account, token must be returned by Stripe.js
+        Add a new card to scripe account, token must be returned by Stripe.js.
+        This also will make the new card the default resource
             -2 the user is a guest
             -1  unexpected error
             0   card was added succesfully
@@ -42,11 +43,16 @@ class CardManager(object):
                 result = (self.add_stripe_id(user)) * -1 
                 record = self.db.find(self.collection_name, {"_id": ObjectId(user)})
             if not result:
-                if stripe.Customer.create_source(
+                source = stripe.Customer.create_source(
                     record['stripe_id'],
                     source=token
-                ) is None:
-                    result = -1
+                )
+                if result is not -1:
+                    stripe.Customer.modify(
+                        record['stripe_id'],
+                        default_source=source['id']
+                    )
+
         return result
 
     def get_cards(self, user):

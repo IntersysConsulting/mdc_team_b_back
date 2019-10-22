@@ -20,11 +20,9 @@ Parser.add_argument('limit',
 #################
 
 
-def Get(args, identify):
-    limit = args['limit']
-    
+def Get(args, identify):    
     cm = CardManager()
-    result = cm.get_cards(identify, limit=limit)
+    result = cm.get_cards(identify)
     
     if result is not None:
         return jsonify({
