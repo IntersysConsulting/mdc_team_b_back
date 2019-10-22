@@ -8,7 +8,7 @@ from .delete import Delete, Parser as delete_cards_parser
 
 from flask_jwt_extended import (get_jwt_identity, jwt_required)
 any_ns = Namespace(
-    "cards",
+    "payment",
     description=
     "Endpoints that allow users to interact with their credit cards"
 )
@@ -17,7 +17,7 @@ any_ns = Namespace(
 # Customer Section
 ###################################
 
-@any_ns.route("/")
+@any_ns.route("/cards")
 @any_ns.response(401, "Invalid or missing credentials")
 class Card(Resource):
     #############
