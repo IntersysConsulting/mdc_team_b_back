@@ -97,37 +97,48 @@ class UserOrder():
         else:
             cm = CustomerManager()
             customer = cm.get_data(user_id)
-            billing_address = customer["billing_addresses"][billing]
-            shipping_address = customer["shipping_addresses"][shipping]
-            update_result = self.db.update(
-                self.collection_name, {"_id": order["_id"]}, {
-                    "$set": {
-                        "billing_address": billing_address,
-                        "shipping_address": shipping_address,
-                        "payment": payment,
-                        "status": ObjectId(self.statuses["Awaiting Payment"]),
-                        "timestamp": datetime.now()
-                    }
-                })
-            cart_m = CartManager()
-            if update_result == 1:
-                # We could update the order, now we try to empty the cart
-                empty_result = cart_m.empty_cart(user_id)
-                if empty_result == 1:
-                    # Cart was emptied properly
-                    response = 1
-                elif empty_result == 0:
-                    # Could not empty the cart (Partial success)
-                    response = 2
-                elif empty_result == -1:
-                    # User did not have a cart (This should never happen)
-                    response = -3
+            
+            required_fields = ["billing_addresses", "shipping_addresses"]
+
+            keys = [key for key in customer.keys()]
+            
+            customer_has_necessary_fields = all(x in keys for x in required_fields)
+            
+            if not customer_has_necessary_fields:
+                # Customer does not have billing or shipping addresses registered
+                response = -5
+            else:                
+                billing_address = customer["billing_addresses"][billing]
+                shipping_address = customer["shipping_addresses"][shipping]
+                update_result = self.db.update(
+                    self.collection_name, {"_id": order["_id"]}, {
+                        "$set": {
+                            "billing_address": billing_address,
+                            "shipping_address": shipping_address,
+                            "payment": payment,
+                            "status": ObjectId(self.statuses["Awaiting Payment"]),
+                            "timestamp": datetime.now()
+                        }
+                    })
+                cart_m = CartManager()
+                if update_result == 1:
+                    # We could update the order, now we try to empty the cart
+                    empty_result = cart_m.empty_cart(user_id)
+                    if empty_result == 1:
+                        # Cart was emptied properly
+                        response = 1
+                    elif empty_result == 0:
+                        # Could not empty the cart (Partial success)
+                        response = 2
+                    elif empty_result == -1:
+                        # User did not have a cart (This should never happen)
+                        response = -3
+                    else:
+                        # Unexpected value (This should never happen)
+                        response = -4
                 else:
-                    # Unexpected value (This should never happen)
-                    response = -4
-            else:
-                # We could not update the order
-                response = 0
+                    # We could not update the order
+                    response = 0
 
         return response
 
@@ -161,6 +172,7 @@ class UserOrder():
             dumped_order = self.dump(order, exclude=["customer_id", "_id"])
             dumped_order["status"] = self.value_to_status[
                 dumped_order["status"]]
+            dumped_order["order_no"] =  str( int( str(order["_id"]), 16) )
             response.append(dumped_order)
 
         return response

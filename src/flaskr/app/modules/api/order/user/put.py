@@ -36,8 +36,14 @@ def Put(args, identity):
     uo = UserOrder()
     result = uo.finish_order(identity, user_shipping_id, user_billing_id,
                              payment)
-
-    if result == -1:
+    if result == -5:
+        response = jsonify({
+            "statusCode":
+            403,
+            'message':
+            'Customer does not have valid addresses registered.'
+        })
+    elif result == -1:
         response = jsonify({
             "statusCode": 400,
             'message': 'Customer does not have a POSTed order'
