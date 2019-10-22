@@ -49,7 +49,7 @@ class CardManager(object):
                     result = -1
         return result
 
-    def get_cards(self, user, limit=10):
+    def get_cards(self, user):
         '''
         This endpoint it's gonna return all the customer's info
         '''

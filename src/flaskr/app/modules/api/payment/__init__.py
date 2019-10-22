@@ -14,17 +14,17 @@ any_ns = Namespace(
 )
 
 ###################################
-# Customer Section
+# Payment Section
 ###################################
 
-@any_ns.route("/cards")
+@any_ns.route("/")
 @any_ns.response(401, "Invalid or missing credentials")
-class Card(Resource):
+class Pay(Resource):
     #############
     # GET
     #############
-    @any_ns.response(200, "Card info was found")
-    @any_ns.response(400, "No cards registered")
+    @any_ns.response(200, "Payment info was found")
+    @any_ns.response(400, "No payment registered")
     @any_ns.expect(get_cards_parser)
     @jwt_required
     def get(self):
@@ -50,6 +50,44 @@ class Card(Resource):
         args = put_cards_parser.parse_args()
         return Put(args, identify)
 
+
+###################################
+# Card Section
+###################################
+
+@any_ns.route("/cards")
+@any_ns.response(401, "Invalid or missing credentials")
+class Card(Resource):
+    #############
+    # GET
+    #############
+    @any_ns.response(200, "Card info was found")
+    @any_ns.response(400, "No cards registered")
+    @any_ns.expect(get_cards_parser)
+    @jwt_required
+    def get(self):
+        '''
+        √ Returns all the stripe's customer object
+        '''
+        identify = get_jwt_identity()
+        args = get_cards_parser.parse_args()
+        return Get(args, identify)
+
+    #############
+    # PUT
+    #############
+    @any_ns.response(200, "Card info successfully updated")
+    @any_ns.response(400, "Card info could not be added")
+    @any_ns.expect(put_cards_parser)
+    @jwt_required
+    def put(self):
+        '''
+        √  Add a user's payment card. It will create a Stripe Account the first. Set the added card as default.
+        '''
+        identify = get_jwt_identity()
+        args = put_cards_parser.parse_args()
+        return Put(args, identify)
+
     #############
     # DELETE
     #############
@@ -59,7 +97,7 @@ class Card(Resource):
     @jwt_required
     def delete(self):
         '''
-        √ Removes an payment from the user's list
+        √ Removes a card from the user's list
         '''
         identify = get_jwt_identity()
         args = delete_cards_parser.parse_args()
