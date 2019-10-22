@@ -28,6 +28,11 @@ def Put(args, identify):
             "statusCode": 200,
             "message": "Card info successfully updated"
         })
+    elif result is -2:
+        return jsonify({
+            "statusCode": 400,
+            "message": "A Guest can not have card added"
+        })
     else:
         return jsonify({
             "statusCode": 400,

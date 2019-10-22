@@ -26,13 +26,18 @@ class CardManager(object):
     def add_card(self, user, token):        
         '''
         Add a new card to scripe account, token must be returned by Stripe.js
+            -2 the user is a guest
             -1  unexpected error
             0   card was added succesfully
         '''
 
         result = 0
         record = self.db.find(self.collection_name, {"_id": ObjectId(user)})
-        if len(record):
+        if record['is_guest'] is True:
+            result = -2
+            print(r"A guest can't do this")
+
+        if len(record) and not result :
             if not 'stripe_id' in record:
                 result = (self.add_stripe_id(user)) * -1 
                 record = self.db.find(self.collection_name, {"_id": ObjectId(user)})
@@ -50,6 +55,7 @@ class CardManager(object):
         '''
 
         record = self.db.find(self.collection_name, {'_id': ObjectId(user)})
+
         try:
             customer = stripe.Customer.retrieve(record['stripe_id'])
         except KeyError:
