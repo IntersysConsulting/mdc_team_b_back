@@ -12,8 +12,10 @@ class CardManager(object):
         self.db = Database()
 
 
-    def add_stripe_id(self, user):
+    def add_stripe_id(self, user, record):
         customer = stripe.Customer.create(
+            name='{} {}'.format(record['first_name'], record['last_name']),
+            email=record['email'],
             description='Stripe Customer account for {}'.format(user)
         )
         
@@ -41,7 +43,7 @@ class CardManager(object):
 
         if len(record) and not result :
             if not 'stripe_id' in record:
-                result = (self.add_stripe_id(user)) * -1 
+                result = (self.add_stripe_id(user, record)) * -1 
                 record = self.db.find(self.collection_name, {"_id": ObjectId(user)})
             if not result:
                 source = stripe.Customer.create_source(
