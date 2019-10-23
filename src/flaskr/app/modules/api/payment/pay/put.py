@@ -14,7 +14,7 @@ Parser.add_argument('card',
                     required=True)
 Parser.add_argument('amount',
                     help='Amount to charge',
-                    require=True)
+                    required=True)
 
 #################
 # Method        #
