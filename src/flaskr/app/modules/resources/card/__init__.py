@@ -1,3 +1,4 @@
+import re
 from flask import jsonify
 from bson.objectid import ObjectId
 from ...db import Database
@@ -21,7 +22,7 @@ class CardManager(object):
                                 "stripe_id" : customer.id
                             }
                         }
-        ) 
+        )
 
     def add_card(self, user, token):        
         '''
@@ -83,3 +84,43 @@ class CardManager(object):
             response = False
     
         return response
+
+    def put_charge_customer(self, user, card_id, amount):
+        '''
+        -2  card_id format's is wrong
+        -1  unexpected error
+        0   card was added succesfully
+        '''
+        error = 0
+        verify = re.compile(r'.*tok_.*')
+        if verify.match(card_id) is None:
+            error = -2
+    
+        if not error:
+            record = self.db.find(self.collection_name, {'_id': ObjectId(user)})
+            try:
+                charge = stripe.Charge.create(
+                    amount=amount,
+                    currency='usd',
+                    source=card_id,
+                    customer=record['stripe_id']
+                )
+                error = 0
+                if isinstance(charge, stripe.Charge):
+                   pass
+                else:
+                    error = -1
+
+            except KeyError:
+                error = -1
+                print('The user does not have a registered card')        
+        return error
+
+    def put_charge_guest(self, user, token):
+        pass
+
+    def whos_paying(self, user):
+        record = self.db.find(self.collection_name, {'_id': ObjectId(user)})
+        if record['is_guest'] is True:
+            return self.put_charge_guest
+        return self.put_charge_customer

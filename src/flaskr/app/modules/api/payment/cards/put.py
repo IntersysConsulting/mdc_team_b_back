@@ -1,4 +1,4 @@
-from ...resources.card import CardManager 
+from ....resources.card import CardManager 
 from flask import jsonify
 from flask_restplus.namespace import RequestParser
 from flask_jwt_extended import (jwt_required, get_jwt_identity)

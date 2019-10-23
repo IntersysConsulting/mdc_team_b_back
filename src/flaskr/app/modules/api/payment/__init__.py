@@ -2,9 +2,11 @@ from flask_restplus import Resource, Namespace
 #from ..resources.cart import UserCart # Not yet implemented
 # from werkzeug.datastructures import FileStorage  # Only import if needs files
 
-from .get import Get, Parser as get_cards_parser
-from .put import Put, Parser as put_cards_parser
-from .delete import Delete, Parser as delete_cards_parser
+from .pay.put import PayPut, Parser as put_pay_parser
+
+from .cards.get import Get, Parser as get_cards_parser
+from .cards.put import Put, Parser as put_cards_parser
+from .cards.delete import Delete, Parser as delete_cards_parser
 
 from flask_jwt_extended import (get_jwt_identity, jwt_required)
 any_ns = Namespace(
@@ -40,15 +42,16 @@ class Pay(Resource):
     #############
     @any_ns.response(200, "Card info successfully updated")
     @any_ns.response(400, "Card info could not be added")
-    @any_ns.expect(put_cards_parser)
+    @any_ns.expect(put_pay_parser)
     @jwt_required
     def put(self):
         '''
-        √  Add a user's payment card to the list. Create a list and added a card if the list does not exists.
+        √  This method let to make the charge of the order. In case of the guest is expected
+           pass the card token from Stripe.js  as parameter, for the customer it expects the card_id
         '''
         identify = get_jwt_identity()
-        args = put_cards_parser.parse_args()
-        return Put(args, identify)
+        args = put_pay_parser.parse_args()
+        return PayPut(args, identify)
 
 
 ###################################
