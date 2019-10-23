@@ -31,7 +31,7 @@ class Pay(Resource):
     @jwt_required
     def get(self):
         '''
-        √ Returns the user's payment cards (last 4 digits) based on their JWT token.
+        √ Returns the user's charge information.
         '''
         identify = get_jwt_identity()
         args = get_cards_parser.parse_args()
@@ -40,8 +40,8 @@ class Pay(Resource):
     #############
     # PUT
     #############
-    @any_ns.response(200, "Card info successfully updated")
-    @any_ns.response(400, "Card info could not be added")
+    @any_ns.response(200, "Successfully charged")
+    @any_ns.response(400, "Error while trying top make the charge")
     @any_ns.expect(put_pay_parser)
     @jwt_required
     def put(self):

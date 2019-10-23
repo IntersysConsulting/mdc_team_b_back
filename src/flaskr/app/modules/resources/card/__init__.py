@@ -94,10 +94,10 @@ class CardManager(object):
         0   card was added succesfully
         '''
         error = 0
-        verify = re.compile(r'.*tok_.*')
+        verify = re.compile(r'.*card_.*')
         if verify.match(card_id) is None:
             error = -2
-    
+
         if not error:
             record = self.db.find(self.collection_name, {'_id': ObjectId(user)})
             try:
@@ -107,18 +107,23 @@ class CardManager(object):
                     source=card_id,
                     customer=record['stripe_id']
                 )
-                error = 0
                 if isinstance(charge, stripe.Charge):
-                   pass
+                    self.db.update(self.collection_name, {"_id": ObjectId(user)},
+                        {
+                            '$push': {
+                                'stripe_charges': charge['id']
+                            }
+                        }
+                    )
                 else:
                     error = -1
-
-            except KeyError:
+            except (KeyError, stripe.error.InvalidRequestError) as err :
                 error = -1
-                print('The user does not have a registered card')        
+                err_str = err if isinstance(err, stripe.error.InvalidRequestError) else 'The user does not have a registered card'
+                print(err_str)
         return error
 
-    def put_charge_guest(self, user, token):
+    def put_charge_guest(self, user, token, amount):
         pass
 
     def whos_paying(self, user):

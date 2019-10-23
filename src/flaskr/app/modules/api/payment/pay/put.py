@@ -26,10 +26,20 @@ def PayPut(args, identify):
 
     cm = CardManager()
     pay_func = cm.whos_paying(identify)
-    print(pay_func)
+    result = pay_func(identify, token, amount)
     
-    
-    return jsonify({
-        "statusCode": 200,
-        "message": "Card info successfully updated"
-    })
+    if result is 0:
+        return jsonify({
+            "statusCode": 200,
+            "message": "Successfully charged"
+        })
+    if result is -1:
+         return jsonify({
+            "statusCode": 400,
+            "message": "Error while trying top make the charge"
+        })
+    else:
+         return jsonify({
+            "statusCode": 400,
+            "message": "The card's ID format is not correct"
+        })
