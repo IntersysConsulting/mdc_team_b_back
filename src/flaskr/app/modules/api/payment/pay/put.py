@@ -15,19 +15,29 @@ Parser.add_argument('card',
 Parser.add_argument('amount',
                     help='Amount to charge',
                     required=True)
+Parser.add_argument('order_id',
+                    help=r"Order's identifier",
+                    required=True)
 
 #################
 # Method        #
 #################
 
+CLIENT = 1
+GUEST = 0
+
 def PayPut(args, identify):
     token = args['card']    
     amount = args['amount']
+    order_id = args['order_id']
 
     cm = CardManager()
     pay_func = cm.whos_paying(identify)
-    result = pay_func(identify, token, amount)
-    
+    if pay_func:
+        result = cm.put_charge_customer(identify, order_id, token, amount)
+    else:
+        result = cm.put_charge_guest(order_id, token, amount)
+
     if result is 0:
         return jsonify({
             "statusCode": 200,

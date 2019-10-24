@@ -87,7 +87,7 @@ class CardManager(object):
     
         return response
 
-    def put_charge_customer(self, user, card_id, amount):
+    def put_charge_customer(self, user, id, card_id, amount):
         '''
         -2  card_id format's is wrong
         -1  unexpected error
@@ -108,7 +108,7 @@ class CardManager(object):
                     customer=record['stripe_id']
                 )
                 if isinstance(charge, stripe.Charge):
-                    self.db.update(self.collection_name, {"_id": ObjectId(user)},
+                    self.db.update('orders', {"_id": ObjectId(id)},
                         {
                             '$push': {
                                 'stripe_charges': charge['id']
@@ -123,11 +123,43 @@ class CardManager(object):
                 print(err_str)
         return error
 
-    def put_charge_guest(self, user, token, amount):
-        pass
+    def put_charge_guest(self, id, token, amount):
+        '''
+        -2  card_id format's is wrong
+        -1  unexpected error
+        0   card was added succesfully
+        '''
+        error = 0
+        verify = re.compile(r'.*tok_.*')
+        if verify.match(token) is None:
+            error = -2
+
+        if not error:
+            try:
+                charge = stripe.Charge.create(
+                    amount=amount,
+                    currency='usd',
+                    source=token
+                )
+                if isinstance(charge, stripe.Charge):
+                    self.db.update('orders', {"_id": ObjectId(id)},
+                        {
+                            '$push': {  
+                                'stripe_charges': charge['id']
+                            }
+                        }
+                    )
+                else:
+                    error = -1
+            except (KeyError, stripe.error.InvalidRequestError) as err :
+                error = -1
+                err_str = err if isinstance(err, stripe.error.InvalidRequestError) else 'The user does not have a registered card'
+                print(err_str)
+        return error
+
 
     def whos_paying(self, user):
         record = self.db.find(self.collection_name, {'_id': ObjectId(user)})
         if record['is_guest'] is True:
-            return self.put_charge_guest
-        return self.put_charge_customer
+            return False
+        return True
