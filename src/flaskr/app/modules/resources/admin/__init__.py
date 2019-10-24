@@ -84,6 +84,7 @@ class AdminManagement:
         return response
 
     def create_admin(self, first_name, last_name, email):
+        admin_id = None
         try:
             admin = self.db.create(self.collection_name, ({
                 "email": email,
@@ -98,6 +99,7 @@ class AdminManagement:
                 if code != None:
                     # If we were able to request resetting the password
                     result = 1
+                    admin_id = str(admin.inserted_id)
                 else:
                     # If we failed to request the password reset
                     result = -2
@@ -106,7 +108,7 @@ class AdminManagement:
         except errors.DuplicateKeyError:
             #There is an admin with that email already!
             result = -1
-        return result
+        return result, admin_id
 
     def delete_admin(self, id):
         # If the parameter email field is not blank then it tries to delete by email. Otherwise it will look up by _id

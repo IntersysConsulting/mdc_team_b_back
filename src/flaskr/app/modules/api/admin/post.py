@@ -40,15 +40,14 @@ def Post(args, identity):
         response = is_not_admin_response
     else:
         am = AdminManagement()
-        result = am.create_admin(first_name, last_name, email)
+        result, admin_id = am.create_admin(first_name, last_name, email)
 
         if result == 1:
             # We could make the admin and reset it's password. Email was sent through AM.
             response = jsonify({
-                "statusCode":
-                200,
-                "message":
-                "Created admin and requested password reset."
+                "statusCode": 200,
+                "message": "Created admin and requested password reset.",
+                "id": admin_id
             })
         elif result == 2:
             response = jsonify({
@@ -71,8 +70,10 @@ def Post(args, identity):
             })
         else:
             response = jsonify({
-                "statusCode": 400,
-                "message": "Unexpected error with result = {}".format(result)
+                "statusCode":
+                400,
+                "message":
+                "Unexpected error with result = {}".format(result)
             })
 
     return response
