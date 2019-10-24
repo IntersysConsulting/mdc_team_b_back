@@ -100,7 +100,8 @@ class CustomerManager():
                     last_name=None,
                     email=None,
                     phone=None):
-        if is_guest(_id):
+        if is_guest(_id):            
+            response = None
             if (first_name == None or last_name == None or email == None):
                 # Guest must not leave any of these blank
                 response = -1
@@ -119,26 +120,26 @@ class CustomerManager():
             response = -2
 
         # If there is a non-guest customer that already has that email...
+        if response is None:
+            if email_valid:
+                update_fields = {}
+                if first_name != None:
+                    update_fields["first_name"] = first_name
+                if last_name != None:
+                    update_fields["last_name"] = last_name
+                if email != None:
+                    update_fields["email"] = email
+                if phone != None:
+                    update_fields["phone"] = phone
 
-        if email_valid:
-            update_fields = {}
-            if first_name != None:
-                update_fields["first_name"] = first_name
-            if last_name != None:
-                update_fields["last_name"] = last_name
-            if email != None:
-                update_fields["email"] = email
-            if phone != None:
-                update_fields["phone"] = phone
+                print("Updating {} with {}".format(_id, update_fields))
 
-            print("Updating {} with {}".format(_id, update_fields))
-
-            response = self.db.update(self.collection_name,
-                                      {"_id": ObjectId(_id)},
-                                      {"$set": update_fields})
-        elif not email_valid:
-            # If the email is taken already
-            response = -3
+                response = self.db.update(self.collection_name,
+                                        {"_id": ObjectId(_id)},
+                                        {"$set": update_fields})
+            elif not email_valid:
+                # If the email is taken already
+                response = -3
 
         return response
 
