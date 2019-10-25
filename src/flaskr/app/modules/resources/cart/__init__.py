@@ -81,11 +81,12 @@ class CartManager():
                 }
             }})
 
-    def get_cart(self, user):
+    def get_cart(self, user, exclude=True):
         up = product_manager.UserProduct()
 
         raw_cart = self.db.find(self.collection_name, {"user": ObjectId(user)})
-        cart = CartSchema(exclude=['_id', 'user']).dump(raw_cart).data
+
+        cart = CartSchema(exclude=['_id', 'user'] if exclude else []).dump(raw_cart).data
 
         if len(cart):
             product_list = []
