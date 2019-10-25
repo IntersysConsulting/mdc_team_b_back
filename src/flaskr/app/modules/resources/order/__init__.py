@@ -74,9 +74,13 @@ class UserOrder():
     def checkout_order(self, user_id):
         cm = CartManager()
         cart = cm.get_cart(user_id)
-        if self.find_in_checkout_order(user_id) != None:
+        previous_order = self.find_in_checkout_order(user_id)
+        if previous_order != None:
             # User already has an order in checkout
-            response = -2
+            # response = -2 # We aren't doing this anymore, we're updating anyway
+            print("The user already has an order so we are updating it")
+            order = self.make_order(cart, user_id)
+            response = 1 if self.db.update(self.collection_name, {"_id":ObjectId(previous_order["_id"])}, {"$set":order}) != None else 0
         elif not cart:
             # User has no cart, we can't issue an order
             response = -1
@@ -85,7 +89,6 @@ class UserOrder():
             order = self.make_order(cart, user_id)
             response = 1 if self.db.create(self.collection_name,
                                            order) != None else 0
-
         return response
 
     def finish_order(self, user_id, shipping, billing, payment):
