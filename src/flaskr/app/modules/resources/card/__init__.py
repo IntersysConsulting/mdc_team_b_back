@@ -1,6 +1,7 @@
 import re
 from flask import jsonify
 from bson.objectid import ObjectId
+from ..order import UserOrder
 from ...db import Database
 import stripe
 
@@ -8,6 +9,7 @@ stripe.api_key = "sk_test_Xq8C5Ra3nT5aW4PRgrXtQgJv00O7Sw81wo"
 
 class CardManager(object):
     def __init__(self):
+        self.orders_status = UserOrder().statuses
         self.collection_name = "customers"
         self.db = Database()
 
@@ -87,7 +89,7 @@ class CardManager(object):
     
         return response
 
-    def put_charge_customer(self, user, id, card_id, amount):
+    def put_charge_customer(self, user, order_id, card_id):
         '''
         -2  card_id format's is wrong
         -1  unexpected error
@@ -110,8 +112,8 @@ class CardManager(object):
                 if isinstance(charge, stripe.Charge):
                     self.db.update('orders', {"_id": ObjectId(id)},
                         {
-                            '$push': {
-                                'stripe_charges': charge['id']
+                            '$set': {
+                                'stripe_charge': charge['id']
                             }
                         }
                     )
@@ -123,8 +125,9 @@ class CardManager(object):
                 print(err_str)
         return error
 
-    def put_charge_guest(self, id, token, amount):
+    def put_charge_guest(self, order_id, token):
         '''
+        -3  insuficient founds
         -2  card_id format's is wrong
         -1  unexpected error
         0   card was added succesfully
@@ -136,22 +139,32 @@ class CardManager(object):
 
         if not error:
             try:
+                order = self.db.find('orders', {'_id': ObjectId(order_id)})
                 charge = stripe.Charge.create(
-                    amount=amount,
+                    amount=order['total'],
                     currency='usd',
                     source=token
                 )
+
                 if isinstance(charge, stripe.Charge):
-                    self.db.update('orders', {"_id": ObjectId(id)},
+                    self.db.update('orders', {"_id": ObjectId(order_id)},
                         {
-                            '$push': {  
-                                'stripe_charges': charge['id']
+                            '$set': {  
+                                'stripe_charge': charge['id'],
+                                'status':ObjectId(self.orders_status['Awaiting Fulfillment'])
                             }
                         }
                     )
                 else:
-                    error = -1
-            except (KeyError, stripe.error.InvalidRequestError) as err :
+                    self.db.update('orders', {"_id": ObjectId(order_id)},
+                        {
+                            '$set': {  
+                                'status':ObjectId(self.orders_status['Declined'])
+                            }
+                        }
+                    )
+                    error = -3
+            except (stripe.error.InvalidRequestError) as err :
                 error = -1
                 err_str = err if isinstance(err, stripe.error.InvalidRequestError) else 'The user does not have a registered card'
                 print(err_str)

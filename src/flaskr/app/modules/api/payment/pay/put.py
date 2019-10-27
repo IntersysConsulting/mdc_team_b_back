@@ -12,9 +12,7 @@ Parser = RequestParser()
 Parser.add_argument('card',
                     help='''This will expect an card_id o a token from Stripe.js''',
                     required=True)
-Parser.add_argument('amount',
-                    help='Amount to charge',
-                    required=True)
+                    
 Parser.add_argument('order_id',
                     help=r"Order's identifier",
                     required=True)
@@ -28,15 +26,14 @@ GUEST = 0
 
 def PayPut(args, identify):
     token = args['card']    
-    amount = args['amount']
     order_id = args['order_id']
 
     cm = CardManager()
     pay_func = cm.whos_paying(identify)
     if pay_func:
-        result = cm.put_charge_customer(identify, order_id, token, amount)
+        result = cm.put_charge_customer(identify, order_id, token)
     else:
-        result = cm.put_charge_guest(order_id, token, amount)
+        result = cm.put_charge_guest(order_id, token)
 
     if result is 0:
         return jsonify({
