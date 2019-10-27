@@ -91,6 +91,7 @@ class CardManager(object):
 
     def put_charge_customer(self, user, order_id, card_id):
         '''
+        -3  insuficient founds
         -2  card_id format's is wrong
         -1  unexpected error
         0   card was added succesfully
@@ -102,24 +103,36 @@ class CardManager(object):
 
         if not error:
             record = self.db.find(self.collection_name, {'_id': ObjectId(user)})
+            order = self.db.find('orders', {'_id': ObjectId(order_id)})
             try:
                 charge = stripe.Charge.create(
-                    amount=amount,
+                    amount=order['total'],
                     currency='usd',
                     source=card_id,
                     customer=record['stripe_id']
                 )
                 if isinstance(charge, stripe.Charge):
-                    self.db.update('orders', {"_id": ObjectId(id)},
+                    self.db.update('orders', {"_id": ObjectId(order_id)},
                         {
                             '$set': {
-                                'stripe_charge': charge['id']
+                                'stripe_charge': charge['id'],
+                                'status':ObjectId(self.orders_status['Awaiting Fulfillment'])                           
                             }
                         }
                     )
+
+                    print(self.db.find('orders', {'_id': ObjectId(order_id)}))
+
                 else:
-                    error = -1
-            except (KeyError, stripe.error.InvalidRequestError) as err :
+                    self.db.update('orders', {"_id": ObjectId(order_id)},
+                        {
+                            '$set': {  
+                                'status':ObjectId(self.orders_status['Declined'])
+                            }
+                        }
+                    )
+                    error = -3
+            except (stripe.error.InvalidRequestError) as err :
                 error = -1
                 err_str = err if isinstance(err, stripe.error.InvalidRequestError) else 'The user does not have a registered card'
                 print(err_str)

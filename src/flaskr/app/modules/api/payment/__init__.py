@@ -23,21 +23,6 @@ any_ns = Namespace(
 @any_ns.response(401, "Invalid or missing credentials")
 class Pay(Resource):
     #############
-    # GET
-    #############
-    @any_ns.response(200, "Payment info was found")
-    @any_ns.response(400, "No payment registered")
-    @any_ns.expect(get_cards_parser)
-    @jwt_required
-    def get(self):
-        '''
-        √ Returns the user's charge information.
-        '''
-        identify = get_jwt_identity()
-        args = get_cards_parser.parse_args()
-        return Get(args, identify)
-
-    #############
     # PUT
     #############
     @any_ns.response(200, "Successfully charged")
