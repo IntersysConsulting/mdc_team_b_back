@@ -1,7 +1,7 @@
 from flask import jsonify
 from flask_restplus.namespace import RequestParser
 from ...resources.customer import CustomerManager
-from ...resources.validation import is_customer, is_not_customer_response
+from ...resources.validation import is_guest_or_customer, is_not_customer_response
 #################
 # Parser        #
 #################
@@ -12,7 +12,7 @@ from ...resources.validation import is_customer, is_not_customer_response
 
 
 def Get(identity):
-    if not is_customer(identity):
+    if not is_guest_or_customer(identity):
         response = is_not_customer_response
     else:
         cm = CustomerManager()

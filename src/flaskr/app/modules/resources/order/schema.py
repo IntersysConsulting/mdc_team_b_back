@@ -18,3 +18,4 @@ class OrderSchema(Schema):
     billing_address = fields.Nested(BillingAddressSchema)
     shipping_address = fields.Nested(ShippingAddressSchema)
     payment = fields.Str()
+    timestamp = fields.DateTime()

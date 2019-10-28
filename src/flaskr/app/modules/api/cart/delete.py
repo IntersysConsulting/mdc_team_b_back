@@ -25,9 +25,11 @@ def Delete(args, identity):
     response = None
     try:
         if identity is not None:
-            cart = cm.get_cart(identity)
+            cart = cm.get_cart(identity, exclude=False)
+            products = [x["_id"] for x in cart["products"]]
+
             if len(cart):
-                result = cm.delete_cart(identity, pid)
+                result = cm.delete_cart(cart["_id"], pid)
                 if result == 0:
                     response = jsonify({
                         "statusCode": 204,

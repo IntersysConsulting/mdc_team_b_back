@@ -17,6 +17,9 @@ def is_customer(_id):
     }) != None
 
 
+def is_guest_or_customer(_id):
+    return db.find("customers", {"_id":ObjectId(_id)}) != None
+
 def is_admin(_id):
     return db.find("admins", {"_id": ObjectId(_id)}) != None
 
