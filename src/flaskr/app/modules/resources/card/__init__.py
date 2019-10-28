@@ -111,7 +111,7 @@ class CardManager(object):
                     source=card_id,
                     customer=record['stripe_id']
                 )
-                if isinstance(charge, stripe.Charge):
+                if isinstance(charge, stripe.Charge) and charge['paid']:
                     self.db.update('orders', {"_id": ObjectId(order_id)},
                         {
                             '$set': {
@@ -155,7 +155,7 @@ class CardManager(object):
                     source=token
                 )
 
-                if isinstance(charge, stripe.Charge):
+                if isinstance(charge, stripe.Charge) and charge['paid']:
                     self.db.update('orders', {"_id": ObjectId(order_id)},
                         {
                             '$set': {  
