@@ -120,9 +120,6 @@ class CardManager(object):
                             }
                         }
                     )
-
-                    print(self.db.find('orders', {'_id': ObjectId(order_id)}))
-
                 else:
                     self.db.update('orders', {"_id": ObjectId(order_id)},
                         {
@@ -132,10 +129,9 @@ class CardManager(object):
                         }
                     )
                     error = -3
-            except (stripe.error.InvalidRequestError) as err :
+            except Exception as err :
                 error = -1
-                err_str = err if isinstance(err, stripe.error.InvalidRequestError) else 'The user does not have a registered card'
-                print(err_str)
+                print(err)
         return error
 
     def put_charge_guest(self, order_id, token):
@@ -177,10 +173,9 @@ class CardManager(object):
                         }
                     )
                     error = -3
-            except (stripe.error.InvalidRequestError) as err :
+            except Exception as err :
                 error = -1
-                err_str = err if isinstance(err, stripe.error.InvalidRequestError) else 'The user does not have a registered card'
-                print(err_str)
+                print(err)
         return error
 
 
