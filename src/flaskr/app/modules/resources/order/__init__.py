@@ -158,7 +158,7 @@ class UserOrder():
                                   ascending, page)
         response = []
         for order in orders:
-            dumped_order = self.dump(order, exclude=["customer_id", "_id"])
+            dumped_order = self.dump(order, exclude=["customer_id"])
             dumped_order["status"] = self.value_to_status[
                 dumped_order["status"]]
             response.append(dumped_order)

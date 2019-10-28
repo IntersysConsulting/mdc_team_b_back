@@ -8,6 +8,7 @@ import flask_jwt_extended
 # When you finish your class, add it under this one.
 from .product import any_ns as product_any, admin_ns as product_admin
 from .order import user_ns as order_user, admin_ns as order_admin
+from .payment import any_ns as cards_any
 from .cart import any_ns as cart_any
 from .customer import customer_ns as customer_user
 from .identity import identity_ns as identity_user
@@ -59,6 +60,7 @@ def handle_validation_error(error):
 ###################################
 #   User Namespaces
 ###################################
+api.add_namespace(cards_any)
 api.add_namespace(cart_any)
 api.add_namespace(customer_user)
 api.add_namespace(identity_user)
