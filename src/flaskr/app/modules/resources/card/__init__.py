@@ -4,6 +4,7 @@ from bson.objectid import ObjectId
 from ..order import UserOrder
 from ...db import Database
 import stripe
+from ..mail.send_receipt import send_receipt as mail_receipt
 
 stripe.api_key = "sk_test_Xq8C5Ra3nT5aW4PRgrXtQgJv00O7Sw81wo"
 
@@ -20,7 +21,7 @@ class CardManager(object):
             email=record['email'],
             description='Stripe Customer account for {}'.format(user)
         )
-        
+
         return not self.db.update(self.collection_name, {"_id": ObjectId(user)},
                         { "$set": {
                                 "stripe_id" : customer.id
@@ -28,7 +29,7 @@ class CardManager(object):
                         }
         )
 
-    def add_card(self, user, token):        
+    def add_card(self, user, token):
         '''
         Add a new card to scripe account, token must be returned by Stripe.js.
         This also will make the new card the default resource
@@ -45,7 +46,7 @@ class CardManager(object):
 
         if len(record) and not result :
             if not 'stripe_id' in record:
-                result = (self.add_stripe_id(user, record)) * -1 
+                result = (self.add_stripe_id(user, record)) * -1
                 record = self.db.find(self.collection_name, {"_id": ObjectId(user)})
             if not result:
                 source = stripe.Customer.create_source(
@@ -57,7 +58,6 @@ class CardManager(object):
                         record['stripe_id'],
                         default_source=source['id']
                     )
-
         return result
 
     def get_cards(self, user):
@@ -86,7 +86,7 @@ class CardManager(object):
             )['deleted']
         except KeyError:
             response = False
-    
+
         return response
 
     def put_charge_customer(self, user, order_id, card_id):
@@ -116,14 +116,15 @@ class CardManager(object):
                         {
                             '$set': {
                                 'stripe_charge': charge['id'],
-                                'status':ObjectId(self.orders_status['Awaiting Fulfillment'])                           
+                                'status':ObjectId(self.orders_status['Awaiting Fulfillment'])
                             }
                         }
                     )
+                    self.send_receipt(order_id)
                 else:
                     self.db.update('orders', {"_id": ObjectId(order_id)},
                         {
-                            '$set': {  
+                            '$set': {
                                 'status':ObjectId(self.orders_status['Declined'])
                             }
                         }
@@ -158,16 +159,17 @@ class CardManager(object):
                 if isinstance(charge, stripe.Charge) and charge['paid']:
                     self.db.update('orders', {"_id": ObjectId(order_id)},
                         {
-                            '$set': {  
+                            '$set': {
                                 'stripe_charge': charge['id'],
                                 'status':ObjectId(self.orders_status['Awaiting Fulfillment'])
                             }
                         }
                     )
+                    self.send_receipt(order_id)
                 else:
                     self.db.update('orders', {"_id": ObjectId(order_id)},
                         {
-                            '$set': {  
+                            '$set': {
                                 'status':ObjectId(self.orders_status['Declined'])
                             }
                         }
@@ -184,3 +186,13 @@ class CardManager(object):
         if record['is_guest'] is True:
             return False
         return True
+
+    def send_receipt(self, order_id):
+        '''
+        Sends an email to the recipient of the order    
+        '''
+        order = self.db.find("orders", {"_id":ObjectId(order_id)})
+        if order is not None:
+            customer = self.db.find("customers", {"_id":ObjectId(order["customer_id"])})
+            if customer is not None:
+                mail_receipt(order["products"], customer["email"])

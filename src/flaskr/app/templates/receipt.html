@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Ecommerce Receipt</title>
+    <style>
+      * {
+        text-align: center;
+      }
+      table.intersysTable {
+        border: 1px solid #1c6ea4;
+        background-color: #eeeeee;
+        width: 100%;
+        text-align: left;
+        border-collapse: collapse;
+      }
+      table.intersysTable td,
+      table.intersysTable th {
+        border: 1px solid #aaaaaa;
+        padding: 3px 2px;
+      }
+      table.intersysTable tbody td {
+        font-size: 13px;
+      }
+      table.intersysTable tr:nth-child(even) {
+        background: #d0e4f5;
+      }
+      table.intersysTable thead {
+        background: #1c6ea4;
+        background: -moz-linear-gradient(
+          top,
+          #5592bb 0%,
+          #327cad 66%,
+          #1c6ea4 100%
+        );
+        background: -webkit-linear-gradient(
+          top,
+          #5592bb 0%,
+          #327cad 66%,
+          #1c6ea4 100%
+        );
+        background: linear-gradient(
+          to bottom,
+          #5592bb 0%,
+          #327cad 66%,
+          #1c6ea4 100%
+        );
+        border-bottom: 2px solid #444444;
+      }
+      table.intersysTable thead th {
+        font-size: 15px;
+        font-weight: bold;
+        color: #ffffff;
+        border-left: 2px solid #d0e4f5;
+      }
+      table.intersysTable thead th:first-child {
+        border-left: none;
+      }
+
+      table.intersysTable tfoot {
+        font-size: 14px;
+        font-weight: bold;
+        background: #1c6ea4;
+        color: #ffffff;
+        border-top: 2px solid #444444;
+        text-align: right;
+      }
+      table.intersysTable tfoot td {
+        font-size: 14px;
+      }
+      table.intersysTable tfoot .links {
+        text-align: right;
+      }
+      table.intersysTable tfoot .links a {
+        display: inline-block;
+        background: #1c6ea4;
+        color: #ffffff;
+        padding: 2px 8px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <br />
+    <img src="cid:Myimage" />
+    Thank you for purchasing from eCommerce, here's your receipt.
+    <table class="intersysTable">
+      <thead>
+        <th>
+          Name
+        </th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+      </thead>
+      {% for item in product_list %}
+      <tr>
+        <td>{{ item["name"] }}</td>
+        <td>$ {{ "%.2f"|format( item["unitary_price"] / 100 ) }}</td>
+        <td>{{ item["quantity"] }}</td>
+        <td>
+          $
+          {{ "%.2f"|format( (item["unitary_price"] * item["quantity"]) / 100 ) }}
+        </td>
+      </tr>
+      {% endfor %}
+      <tfoot>
+        <td colspan="4">Total ${{ total }}</td>
+      </tfoot>
+    </table>
+  </body>
+</html>
